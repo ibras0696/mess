@@ -66,10 +66,15 @@ export const useRealtimeWs = () => {
 
   useEffect(() => {
     if (!accessToken) {
-      setConnected(false)
-      setSender(undefined)
+      // Сбрасываем только если что-то было установлено, чтобы не гонять setState без конца
+      const { send, connected } = useWSStore.getState()
+      if (send || connected) {
+        setSender(undefined)
+        setConnected(false)
+      }
       return
     }
+
     const client = createWSClient(appConfig.wsUrl, accessToken, (event) => handlerRef.current?.(event), {
       onOpen: () => setConnected(true),
       onClose: () => setConnected(false),
