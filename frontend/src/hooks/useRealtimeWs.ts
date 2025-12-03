@@ -9,6 +9,7 @@ import { useWSStore } from '../store/useWSStore'
 export const useRealtimeWs = () => {
   const accessToken = useAuthStore((state) => state.accessToken)
   const user = useAuthStore((state) => state.user)
+  const authReady = useAuthStore((state) => state.authReady)
   const setConnected = useWSStore((state) => state.setConnected)
   const setLastEventAt = useWSStore((state) => state.setLastEventAt)
   const setSender = useWSStore((state) => state.setSender)
@@ -17,6 +18,7 @@ export const useRealtimeWs = () => {
   const replaceTemp = useMessageStore((state) => state.replaceTemp)
 
   const clientRef = useRef<ReturnType<typeof createWSClient> | null>(null)
+  const prevTokenRef = useRef<string | null>(null)
 
   // Держим обработчик в ref, чтобы эффект создания сокета не пересоздавался
   const handlerRef = useRef<(event: ServerEvent) => void>()
@@ -67,19 +69,35 @@ export const useRealtimeWs = () => {
   }
 
   useEffect(() => {
-    // очистка предыдущего клиента, если токен сменился/обнулился
-    clientRef.current?.close()
-    clientRef.current = null
-    setSender(undefined)
-    setConnected(false)
+    // Если авторизация не готова или нет токена — чистим клиент только один раз
+    if (!authReady || !accessToken) {
+      if (clientRef.current) {
+        clientRef.current.close()
+        clientRef.current = null
+      }
+      if (prevTokenRef.current) {
+        setSender(undefined)
+        setConnected(false)
+      }
+      prevTokenRef.current = null
+      return
+    }
 
-    if (!accessToken) return
+    // Если токен не поменялся и клиент жив — ничего не делаем
+    if (prevTokenRef.current === accessToken && clientRef.current) return
+
+    // Токен новый или клиента нет — пересоздаём
+    if (clientRef.current) {
+      clientRef.current.close()
+      clientRef.current = null
+    }
 
     const client = createWSClient(appConfig.wsUrl, accessToken, (event) => handlerRef.current?.(event), {
       onOpen: () => setConnected(true),
       onClose: () => setConnected(false),
     })
     clientRef.current = client
+    prevTokenRef.current = accessToken
     setSender(() => (payload: ClientEvent) => client.send(payload))
 
     return () => {
@@ -87,8 +105,9 @@ export const useRealtimeWs = () => {
       clientRef.current = null
       setSender(undefined)
       setConnected(false)
+      prevTokenRef.current = null
     }
-  }, [accessToken, setConnected, setSender])
+  }, [accessToken, authReady, setConnected, setSender])
 
   const sendMessage = (payload: ClientEvent) => {
     const sender = useWSStore.getState().send

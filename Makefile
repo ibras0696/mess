@@ -55,3 +55,12 @@ init: env up
 # Очистка артефактов Playwright/временных файлов (без git clean)
 clean:
 	rm -rf frontend/tmp-repro.js frontend/tmp-repro.png /tmp/playwright* || true
+
+# Быстрый вывод команды очистки токенов в браузере
+clear-storage:
+	@echo "Вставь в консоль браузера для очистки localStorage:" && \
+	echo "localStorage.removeItem('wm.access'); localStorage.removeItem('wm.refresh'); localStorage.clear(); console.log('cleared localStorage');"
+
+# Перезапуск без удаления томов (сохраняет БД/Redis)
+restart-novols:
+	$(COMPOSE) down && $(COMPOSE) up -d
