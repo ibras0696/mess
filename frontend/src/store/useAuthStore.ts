@@ -7,12 +7,14 @@ type AuthState = {
   refreshToken: string | null
   tokenType: string | null
   user: User | null
+  authReady: boolean
 }
 
 type AuthActions = {
   setTokens: (accessToken: string, refreshToken: string) => void
   setTokenType: (tokenType: string) => void
   setUser: (user: AuthState['user']) => void
+  setAuthReady: (ready: boolean) => void
   reset: () => void
   hydrate: () => void
 }
@@ -22,6 +24,7 @@ const initialState: AuthState = {
   refreshToken: null,
   tokenType: null,
   user: null,
+  authReady: false,
 }
 
 export const useAuthStore = create<AuthState & AuthActions>((set) => ({
@@ -32,9 +35,10 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
   },
   setUser: (user) => set({ user }),
   setTokenType: (tokenType) => set({ tokenType }),
+  setAuthReady: (ready) => set({ authReady: ready }),
   reset: () => {
     tokenStorage.clear()
-    set(initialState)
+    set({ ...initialState, authReady: true })
   },
   hydrate: () => {
     const { access, refresh } = tokenStorage.load()

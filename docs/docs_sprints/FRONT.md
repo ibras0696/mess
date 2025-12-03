@@ -31,6 +31,7 @@
 - Сделано:
   - Подтянул изменения бэкенда (JWT auth). Фронт адаптирован к новым ответам TokenPair: токены + user с created_at, token_type=bearer.
   - Регистрация теперь сразу логинит и сохраняет токены/пользователя в Zustand/localStorage.
+  - Добавлен bootstrap/refresh: при старте пробуем refresh + /users/me, защищённые маршруты (chats/chat/:id) через ProtectedRoute.
 - В работе:
   - Генерация TS OpenAPI клиента и подключение чатов/сообщений.
 - Блокеры/риски:

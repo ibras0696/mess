@@ -8,6 +8,7 @@ import { ChatsPage } from './pages/Chats'
 import { HomePage } from './pages/Home'
 import { LoginPage } from './pages/Login'
 import { RegisterPage } from './pages/Register'
+import { ProtectedRoute } from './components/Auth/ProtectedRoute'
 
 const router = createBrowserRouter([
   {
@@ -17,8 +18,22 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'register', element: <RegisterPage /> },
-      { path: 'chats', element: <ChatsPage /> },
-      { path: 'chat/:id', element: <ChatRoomPage /> },
+      {
+        path: 'chats',
+        element: (
+          <ProtectedRoute>
+            <ChatsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'chat/:id',
+        element: (
+          <ProtectedRoute>
+            <ChatRoomPage />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
 ])
