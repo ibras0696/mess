@@ -50,6 +50,26 @@
   - Alembic миграции: 20251203_init_users
   - docker-compose/Makefile: Makefile migrate обновлён; compose без изменений
 
+## 2025-12-03 — Спринт 3 (REST чаты)
+- Сделано:
+  - Добавлены модели/схемы: Chat, ChatMember, Message; репозитории и сервисы.
+  - Эндпоинты: POST /api/chats (создание), GET /api/chats (список пользователя), GET /api/chats/{id}/messages (limit/before_id), POST /api/chats/{id}/messages (отправка).
+  - Alembic миграция `20251203_add_chats_messages`, отключён auto create_all.
+  - Docker compose: смена портов для host map (5433 db, 6380 redis, 9002/9003 minio, 1026/8026 mailhog) чтобы избежать конфликтов.
+  - Смоук: поднял stack, применил миграции, завёл 2 пользователей, создал чат, отправил/прочитал сообщение.
+- В работе:
+  - Следующий шаг — WebSocket (спринт 4) после фронтовых потребностей.
+- Блокеры/риски:
+  - Предупреждение по mailhog amd64 на arm64 остаётся.
+- Следующие шаги:
+  - Реализовать WS в спринте 4 (send_message/typing/online).
+- Артефакты:
+  - PR: -
+  - API_CONTRACT: обновлён? нет (REST чаты без уточнения полей в контракте)
+  - openapi.json: обновлён? нет
+  - Alembic миграции: 20251203_init_users, 20251203_add_chats_messages
+  - docker-compose/Makefile: compose порты обновлены
+
 ## 2025-12-03 — Спринт 1 (инфра)
 - Сделано:
   - Собрал и поднял стек docker-compose (backend, celery, db, redis, minio, mailhog, фронт-заглушка).
