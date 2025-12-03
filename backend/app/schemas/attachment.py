@@ -12,3 +12,24 @@ class PresignResponse(BaseModel):
     method: str = "PUT"
     expires_in: int
     object_key: str
+
+
+class AttachmentMeta(BaseModel):
+    object_key: str
+    file_name: str
+    content_type: str
+    size_bytes: int | None = None
+    url: str | None = None
+
+
+class AttachmentRead(BaseModel):
+    id: int
+    object_key: str
+    file_name: str
+    content_type: str
+    size_bytes: int | None = None
+    url: str | None = None
+    created_at: str
+
+    class Config:
+        from_attributes = True

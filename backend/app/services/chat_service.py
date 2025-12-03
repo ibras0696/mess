@@ -7,7 +7,8 @@ from app.core.config import settings
 from app.core.redis import get_redis
 from app.repositories.chat_repo import ChatRepository, MessageRepository
 from app.repositories.user_repo import UserRepository
-from app.schemas.chat import ChatCreate, ChatRead, MessageRead
+from app.schemas.attachment import AttachmentMeta
+from app.schemas.chat import ChatCreate, ChatRead, MessageCreate, MessageRead
 from app.workers.celery_app import celery_app
 
 
@@ -40,17 +41,21 @@ class ChatService:
         messages = self.message_repo.list_messages(chat_id=chat_id, limit=limit, before_id=before_id)
         return [MessageRead.model_validate(m) for m in messages]
 
-    def send_message(self, chat_id: int, user_id: int, text: str) -> MessageRead:
+    def send_message(self, chat_id: int, user_id: int, data: MessageCreate) -> MessageRead:
         if not self.chat_repo.is_member(chat_id, user_id):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not a member of this chat")
         self._check_rate_limit(user_id)
-        safe_text = html.escape(text).strip()
+        safe_text = html.escape(data.text).strip()
         if not safe_text:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Empty message")
         msg = self.message_repo.create_message(chat_id=chat_id, sender_id=user_id, text=safe_text)
+        if data.attachments:
+            attachment_repo = AttachmentRepository(self.session)
+            items = [a.model_dump() for a in data.attachments]
+            attachment_repo.bulk_create(message_id=msg.id, items=items)
         self.session.commit()
         self.session.refresh(msg)
-        self._notify_email(chat_id=chat_id, sender_id=user_id, text=text)
+        self._notify_email(chat_id=chat_id, sender_id=user_id, text=safe_text)
         return MessageRead.model_validate(msg)
 
     def get_member_ids(self, chat_id: int) -> set[int]:

@@ -8,6 +8,8 @@ from app.core.database import get_session
 from app.services.chat_service import ChatService
 from app.ws.connection_manager import ConnectionManager
 from app.ws.events import ClientEventType, ServerEventType, TypingPayload
+from app.schemas.attachment import AttachmentMeta
+from app.schemas.chat import MessageCreate
 
 router = APIRouter()
 manager = ConnectionManager()
@@ -49,10 +51,16 @@ async def websocket_endpoint(
                 temp_id = data.get("temp_id")
                 chat_id = data.get("conversation_id")
                 text = data.get("text")
+                attachments = data.get("attachments", [])
                 if not chat_id or not text:
                     await websocket.send_json({"type": "error", "detail": "invalid payload"})
                     continue
-                msg = service.send_message(chat_id=chat_id, user_id=user_id, text=text)
+                attach_objs = [AttachmentMeta(**a) for a in attachments]
+                msg = service.send_message(
+                    chat_id=chat_id,
+                    user_id=user_id,
+                    data=MessageCreate(text=text, attachments=attach_objs),
+                )
                 payload = msg.model_dump(mode="json")
                 await manager.send_personal(
                     user_id,

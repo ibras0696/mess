@@ -30,6 +30,24 @@
 ## Журнал
 *(ниже добавляй записи по шаблону — свежие выше)*
 
+## 2025-12-03 — Спринт 6 (Стабилизация, частично)
+- Сделано:
+  - Rate limit на отправку сообщений (Redis, лимит по умолчанию 60/мин), XSS escape/trim текста, пустые сообщения запрещены.
+  - Regenerate openapi.json под текущий API/WS.
+  - Endpoint `/api/attachments/link` для сохранения метаданных файла к сообщению.
+- В работе:
+  - Доп. hardening (security headers, индексы), фиксация WS delivered/read/online по договорённости.
+- Блокеры/риски:
+  - Email уведомления пока шлются всем участникам (нет проверки оффлайна).
+- Следующие шаги:
+  - Уточнить/внедрить delivered/read/online, завершить hardening.
+- Артефакты:
+  - PR: -
+  - API_CONTRACT: обновлён? частично (WS/attachments)
+  - openapi.json: обновлён? да
+  - Alembic миграции: 20251203_add_attachments (+ пред.)
+  - docker-compose/Makefile: порты/переменные обновлены
+
 ## 2025-12-03 — Спринт 4 (WebSocket)
 - Сделано:
   - Реализован WS endpoint `/ws?token=JWT`: аутентификация по access JWT, менеджер подключений.
