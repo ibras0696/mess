@@ -6,8 +6,18 @@ export type WSClient = {
   close: () => void
 }
 
-export const createWSClient = (url: string, token: string, onMessage: (event: ServerEvent) => void): WSClient => {
-  const manager = createWSManager({ url, token, onMessage })
+type WSClientOptions = {
+  onOpen?: () => void
+  onClose?: () => void
+}
+
+export const createWSClient = (
+  url: string,
+  token: string,
+  onMessage: (event: ServerEvent) => void,
+  options?: WSClientOptions,
+): WSClient => {
+  const manager = createWSManager({ url, token, onMessage, onOpen: options?.onOpen, onClose: options?.onClose })
 
   return {
     send: (payload) => manager.send(payload),

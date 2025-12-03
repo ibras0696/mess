@@ -4,6 +4,7 @@ import { useApiClients } from '../hooks/useApiClients'
 import { useAuthStore } from '../store/useAuthStore'
 import { useChatStore } from '../store/useChatStore'
 import { useMessageStore } from '../store/useMessageStore'
+import { useWSStore } from '../store/useWSStore'
 import { formatTime } from '../utils/formatting'
 
 export const ChatRoomPage = () => {
@@ -12,16 +13,22 @@ export const ChatRoomPage = () => {
   const { chatsApi } = useApiClients()
   const accessToken = useAuthStore((state) => state.accessToken)
   const authReady = useAuthStore((state) => state.authReady)
+  const currentUser = useAuthStore((state) => state.user)
   const chat = useChatStore((state) => state.chats.find((c) => c.id === chatId))
   const setMessages = useMessageStore((state) => state.setMessages)
   const addMessage = useMessageStore((state) => state.addMessage)
   const messages = useMessageStore((state) => (chatId ? state.byChatId[chatId] ?? [] : []))
+  const sendWs = useWSStore((state) => state.send)
+  const typingByChat = useWSStore((state) => state.typingByChat)
+  const connected = useWSStore((state) => state.connected)
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [text, setText] = useState('')
 
   const canSend = useMemo(() => Boolean(text.trim()), [text])
+  const typingUsers = chatId ? typingByChat[chatId] ?? [] : []
+  const [isTypingSelf, setIsTypingSelf] = useState(false)
 
   useEffect(() => {
     if (!authReady || !accessToken || !chatId) return
@@ -48,7 +55,29 @@ export const ChatRoomPage = () => {
   }, [accessToken, authReady, chatId, chatsApi, setMessages])
 
   const handleSend = async () => {
-    if (!chatId || !canSend) return
+    if (!chatId || !canSend || !currentUser) return
+    const tempId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `tmp-${Date.now()}`
+
+    if (sendWs && connected) {
+      addMessage(chatId, {
+        id: -1,
+        chatId,
+        authorId: currentUser.id,
+        text,
+        createdAt: new Date().toISOString(),
+        tempId,
+      })
+      sendWs({
+        type: 'send_message',
+        temp_id: tempId,
+        conversation_id: chatId,
+        text,
+        attachments: [],
+      })
+      setText('')
+      return
+    }
+
     try {
       const sent = await chatsApi.sendMessageApiChatsChatIdMessagesPost({
         chatId,
@@ -65,6 +94,12 @@ export const ChatRoomPage = () => {
     } catch {
       setError('Не удалось отправить сообщение. Проверьте API.')
     }
+  }
+
+  const handleTyping = (isTyping: boolean) => {
+    if (!chatId || !sendWs || !connected) return
+    sendWs({ type: isTyping ? 'typing_start' : 'typing_stop', conversation_id: chatId })
+    setIsTypingSelf(isTyping)
   }
 
   return (
@@ -93,7 +128,10 @@ export const ChatRoomPage = () => {
           </div>
           <div className="mt-3 space-y-2">
             {messages.map((msg) => (
-              <article key={msg.id} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+              <article
+                key={msg.id !== -1 ? msg.id : msg.tempId ?? `${msg.id}-${msg.text}`}
+                className="rounded-lg border border-white/10 bg-white/5 px-3 py-2"
+              >
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-semibold text-white">User {msg.authorId}</p>
                   <span className="text-xs text-slate-400">{formatTime(msg.createdAt)}</span>
@@ -102,6 +140,11 @@ export const ChatRoomPage = () => {
               </article>
             ))}
             {!messages.length && <p className="text-sm text-slate-400">Нет сообщений</p>}
+            {typingUsers.length > 0 && (
+              <p className="text-xs text-slate-400">
+                typing: {typingUsers.map((id) => `User ${id}`).join(', ')}
+              </p>
+            )}
           </div>
         </div>
 
@@ -111,7 +154,11 @@ export const ChatRoomPage = () => {
             className="min-h-[80px] w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-sky-400/60 focus:outline-none"
             placeholder="Текст сообщения"
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              setText(e.target.value)
+              handleTyping(true)
+            }}
+            onBlur={() => handleTyping(false)}
           />
           <button
             type="button"

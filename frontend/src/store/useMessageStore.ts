@@ -16,6 +16,7 @@ type MessageState = {
 type MessageActions = {
   setMessages: (chatId: number, messages: Message[]) => void
   addMessage: (chatId: number, message: Message) => void
+  replaceTemp: (chatId: number, tempId: string, message: Message) => void
 }
 
 export const useMessageStore = create<MessageState & MessageActions>((set) => ({
@@ -26,5 +27,11 @@ export const useMessageStore = create<MessageState & MessageActions>((set) => ({
     set((state) => {
       const existing = state.byChatId[chatId] ?? []
       return { byChatId: { ...state.byChatId, [chatId]: [...existing, message] } }
+    }),
+  replaceTemp: (chatId, tempId, message) =>
+    set((state) => {
+      const existing = state.byChatId[chatId] ?? []
+      const updated = existing.map((m) => (m.tempId === tempId ? message : m))
+      return { byChatId: { ...state.byChatId, [chatId]: updated } }
     }),
 }))

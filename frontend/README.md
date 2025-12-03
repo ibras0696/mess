@@ -29,7 +29,7 @@ make frontend   # рестарт фронта
 - `src/components` — UI блоки (ChatList, MessageList, MessageInput и т.д.)
 
 ## ENV
-- `VITE_API_URL` (по умолчанию http://localhost:8000/api)
+- `VITE_API_URL` (по умолчанию http://localhost:8000/api; скорректируйте, если BACKEND_PORT меняли)
 - `VITE_WS_URL` (по умолчанию ws://localhost:8000/ws)
 
 ## Tailwind

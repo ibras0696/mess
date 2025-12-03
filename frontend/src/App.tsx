@@ -2,12 +2,14 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { useAuthStore } from './store/useAuthStore'
 import { useWSStore } from './store/useWSStore'
 import { useAuthBootstrap } from './hooks/useAuthBootstrap'
+import { useRealtimeWs } from './hooks/useRealtimeWs'
 
 function App() {
   const user = useAuthStore((state) => state.user)
   const connected = useWSStore((state) => state.connected)
 
   useAuthBootstrap()
+  useRealtimeWs()
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0b1224] via-[#0f172a] to-[#0b1224] px-6 py-6">
