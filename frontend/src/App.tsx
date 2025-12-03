@@ -3,6 +3,7 @@ import { useAuthStore } from './store/useAuthStore'
 import { useWSStore } from './store/useWSStore'
 import { useAuthBootstrap } from './hooks/useAuthBootstrap'
 import { useRealtimeWs } from './hooks/useRealtimeWs'
+import { initGlobalErrorLogging } from './utils/debugLog'
 
 function App() {
   const user = useAuthStore((state) => state.user)
@@ -10,6 +11,7 @@ function App() {
 
   useAuthBootstrap()
   useRealtimeWs()
+  initGlobalErrorLogging()
 
   const navLoggedIn = Boolean(user)
 

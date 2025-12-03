@@ -25,6 +25,8 @@ type MessageState = {
   byChatId: Record<number, Message[]>
 }
 
+const EMPTY_MESSAGES: Message[] = []
+
 type MessageActions = {
   setMessages: (chatId: number, messages: Message[]) => void
   addMessage: (chatId: number, message: Message) => void
@@ -37,13 +39,15 @@ export const useMessageStore = create<MessageState & MessageActions>((set) => ({
     set((state) => ({ byChatId: { ...state.byChatId, [chatId]: messages } })),
   addMessage: (chatId, message) =>
     set((state) => {
-      const existing = state.byChatId[chatId] ?? []
+      const existing = state.byChatId[chatId] ?? EMPTY_MESSAGES
       return { byChatId: { ...state.byChatId, [chatId]: [...existing, message] } }
     }),
   replaceTemp: (chatId, tempId, message) =>
     set((state) => {
-      const existing = state.byChatId[chatId] ?? []
+      const existing = state.byChatId[chatId] ?? EMPTY_MESSAGES
       const updated = existing.map((m) => (m.tempId === tempId ? message : m))
       return { byChatId: { ...state.byChatId, [chatId]: updated } }
     }),
 }))
+
+export { EMPTY_MESSAGES }
