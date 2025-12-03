@@ -16,6 +16,7 @@ type Attachment = {
   contentType: string
   sizeBytes?: number | null
   url?: string
+  id?: number
 }
 
 type MessageState = {

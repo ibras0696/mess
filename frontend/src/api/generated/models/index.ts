@@ -1,6 +1,9 @@
 /* tslint:disable */
 /* eslint-disable */
 export * from './AccessToken';
+export * from './AttachmentLinkRequest';
+export * from './AttachmentMeta';
+export * from './AttachmentRead';
 export * from './ChatCreate';
 export * from './ChatRead';
 export * from './HTTPValidationError';

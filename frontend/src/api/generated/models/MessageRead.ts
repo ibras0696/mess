@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { AttachmentRead } from './AttachmentRead';
+import {
+    AttachmentReadFromJSON,
+    AttachmentReadFromJSONTyped,
+    AttachmentReadToJSON,
+    AttachmentReadToJSONTyped,
+} from './AttachmentRead';
+
 /**
  * 
  * @export
@@ -43,6 +51,12 @@ export interface MessageRead {
      * @memberof MessageRead
      */
     text: string;
+    /**
+     * 
+     * @type {Array<AttachmentRead>}
+     * @memberof MessageRead
+     */
+    attachments?: Array<AttachmentRead>;
     /**
      * 
      * @type {Date}
@@ -77,6 +91,7 @@ export function MessageReadFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'chatId': json['chat_id'],
         'senderId': json['sender_id'],
         'text': json['text'],
+        'attachments': json['attachments'] == null ? undefined : ((json['attachments'] as Array<any>).map(AttachmentReadFromJSON)),
         'createdAt': (new Date(json['created_at'])),
     };
 }
@@ -96,6 +111,7 @@ export function MessageReadToJSONTyped(value?: MessageRead | null, ignoreDiscrim
         'chat_id': value['chatId'],
         'sender_id': value['senderId'],
         'text': value['text'],
+        'attachments': value['attachments'] == null ? undefined : ((value['attachments'] as Array<any>).map(AttachmentReadToJSON)),
         'created_at': value['createdAt'].toISOString(),
     };
 }

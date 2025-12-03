@@ -46,6 +46,15 @@ export const ChatRoomPage = () => {
           authorId: m.senderId,
           text: m.text,
           createdAt: m.createdAt.toISOString(),
+          attachments:
+            m.attachments?.map((att) => ({
+              id: att.id,
+              objectKey: att.objectKey,
+              fileName: att.fileName,
+              contentType: att.contentType,
+              sizeBytes: att.sizeBytes ?? null,
+              url: att.url ?? undefined,
+            })) ?? [],
         }))
         setMessages(chatId, mapped)
       } catch {
@@ -105,7 +114,16 @@ export const ChatRoomPage = () => {
     try {
       const sent = await chatsApi.sendMessageApiChatsChatIdMessagesPost({
         chatId,
-        sendMessageRequest: { text },
+        sendMessageRequest: {
+          text,
+          attachments: attachments.map((a) => ({
+            objectKey: a.objectKey,
+            fileName: a.fileName,
+            contentType: a.contentType,
+            sizeBytes: a.sizeBytes ?? null,
+            url: a.url ?? null,
+          })),
+        },
       })
       addMessage(chatId, {
         id: sent.id,
@@ -113,6 +131,15 @@ export const ChatRoomPage = () => {
         authorId: sent.senderId,
         text: sent.text,
         createdAt: sent.createdAt.toISOString(),
+        attachments:
+          sent.attachments?.map((att) => ({
+            id: att.id,
+            objectKey: att.objectKey,
+            fileName: att.fileName,
+            contentType: att.contentType,
+            sizeBytes: att.sizeBytes ?? null,
+            url: att.url ?? undefined,
+          })) ?? [],
       })
       setText('')
       setAttachments([])

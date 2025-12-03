@@ -29,6 +29,7 @@ export const useRealtimeWs = () => {
           text: msg.text,
           createdAt: msg.created_at,
           attachments: msg.attachments?.map((a) => ({
+            id: a.id,
             objectKey: a.object_key,
             fileName: a.file_name,
             contentType: a.content_type,
@@ -47,6 +48,7 @@ export const useRealtimeWs = () => {
           text: msg.text,
           createdAt: msg.created_at,
           attachments: msg.attachments?.map((a) => ({
+            id: a.id,
             objectKey: a.object_key,
             fileName: a.file_name,
             contentType: a.content_type,

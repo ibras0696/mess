@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { AttachmentMeta } from './AttachmentMeta';
+import {
+    AttachmentMetaFromJSON,
+    AttachmentMetaFromJSONTyped,
+    AttachmentMetaToJSON,
+    AttachmentMetaToJSONTyped,
+} from './AttachmentMeta';
+
 /**
  * 
  * @export
@@ -25,6 +33,12 @@ export interface SendMessageRequest {
      * @memberof SendMessageRequest
      */
     text: string;
+    /**
+     * 
+     * @type {Array<AttachmentMeta>}
+     * @memberof SendMessageRequest
+     */
+    attachments?: Array<AttachmentMeta>;
 }
 
 /**
@@ -46,6 +60,7 @@ export function SendMessageRequestFromJSONTyped(json: any, ignoreDiscriminator: 
     return {
         
         'text': json['text'],
+        'attachments': json['attachments'] == null ? undefined : ((json['attachments'] as Array<any>).map(AttachmentMetaFromJSON)),
     };
 }
 
@@ -61,6 +76,7 @@ export function SendMessageRequestToJSONTyped(value?: SendMessageRequest | null,
     return {
         
         'text': value['text'],
+        'attachments': value['attachments'] == null ? undefined : ((value['attachments'] as Array<any>).map(AttachmentMetaToJSON)),
     };
 }
 

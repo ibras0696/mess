@@ -7,6 +7,7 @@
 Name | Type
 ------------ | -------------
 `text` | string
+`attachments` | [Array&lt;AttachmentMeta&gt;](AttachmentMeta.md)
 
 ## Example
 
@@ -16,6 +17,7 @@ import type { SendMessageRequest } from ''
 // TODO: Update the object below with actual values
 const example = {
   "text": null,
+  "attachments": null,
 } satisfies SendMessageRequest
 
 console.log(example)

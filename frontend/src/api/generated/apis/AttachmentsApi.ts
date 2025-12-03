@@ -15,11 +15,14 @@
 
 import * as runtime from '../runtime';
 import type {
+  AttachmentLinkRequest,
   HTTPValidationError,
   PresignRequest,
   PresignResponse,
 } from '../models/index';
 import {
+    AttachmentLinkRequestFromJSON,
+    AttachmentLinkRequestToJSON,
     HTTPValidationErrorFromJSON,
     HTTPValidationErrorToJSON,
     PresignRequestFromJSON,
@@ -27,6 +30,10 @@ import {
     PresignResponseFromJSON,
     PresignResponseToJSON,
 } from '../models/index';
+
+export interface LinkAttachmentApiAttachmentsLinkPostRequest {
+    attachmentLinkRequest: AttachmentLinkRequest;
+}
 
 export interface PresignUploadApiAttachmentsPresignPostRequest {
     presignRequest: PresignRequest;
@@ -36,6 +43,52 @@ export interface PresignUploadApiAttachmentsPresignPostRequest {
  * 
  */
 export class AttachmentsApi extends runtime.BaseAPI {
+
+    /**
+     * Link Attachment
+     */
+    async linkAttachmentApiAttachmentsLinkPostRaw(requestParameters: LinkAttachmentApiAttachmentsLinkPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['attachmentLinkRequest'] == null) {
+            throw new runtime.RequiredError(
+                'attachmentLinkRequest',
+                'Required parameter "attachmentLinkRequest" was null or undefined when calling linkAttachmentApiAttachmentsLinkPost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("HTTPBearer", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/api/attachments/link`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: AttachmentLinkRequestToJSON(requestParameters['attachmentLinkRequest']),
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Link Attachment
+     */
+    async linkAttachmentApiAttachmentsLinkPost(requestParameters: LinkAttachmentApiAttachmentsLinkPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.linkAttachmentApiAttachmentsLinkPostRaw(requestParameters, initOverrides);
+    }
 
     /**
      * Presign Upload

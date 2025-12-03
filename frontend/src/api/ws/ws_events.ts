@@ -41,6 +41,7 @@ export type ServerEvent =
   | { type: 'online_status'; user_id: number; online: boolean }
 
 export type WSAttachment = {
+  id?: number
   object_key: string
   file_name: string
   content_type: string

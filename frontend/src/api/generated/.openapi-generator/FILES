@@ -6,6 +6,9 @@ apis/MetaApi.ts
 apis/UsersApi.ts
 apis/index.ts
 docs/AccessToken.md
+docs/AttachmentLinkRequest.md
+docs/AttachmentMeta.md
+docs/AttachmentRead.md
 docs/AttachmentsApi.md
 docs/AuthApi.md
 docs/ChatCreate.md
@@ -28,6 +31,9 @@ docs/ValidationError.md
 docs/ValidationErrorLocInner.md
 index.ts
 models/AccessToken.ts
+models/AttachmentLinkRequest.ts
+models/AttachmentMeta.ts
+models/AttachmentRead.ts
 models/ChatCreate.ts
 models/ChatRead.ts
 models/HTTPValidationError.ts
