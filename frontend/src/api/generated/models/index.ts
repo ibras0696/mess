@@ -6,6 +6,8 @@ export * from './ChatRead';
 export * from './HTTPValidationError';
 export * from './LoginRequest';
 export * from './MessageRead';
+export * from './PresignRequest';
+export * from './PresignResponse';
 export * from './RefreshRequest';
 export * from './SendMessageRequest';
 export * from './TokenPair';

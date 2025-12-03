@@ -32,7 +32,7 @@
   - Добавлен WS клиент с автопереподключением, обработка событий message_sent/new_message/typing.
   - Отправка сообщений теперь через WS (с temp_id) с REST fallback; история подтягивается REST, новые приходят live.
   - Индикация typing в чатах, protected маршруты сохраняются.
-  - docker-compose/backend порт теперь настраивается через BACKEND_PORT (по умолчанию 8000).
+  - docker-compose/backend порт теперь настраивается через BACKEND_PORT (по умолчанию 8000); перегенерен OpenAPI клиент после обновления бэка (attachments/ws).
 - В работе:
   - delivered/read/online события и улучшение UX (debounce typing).
 - Блокеры/риски:
