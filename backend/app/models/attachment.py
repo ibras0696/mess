@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy.orm import relationship
 
 from app.models.base import Base
 
@@ -16,3 +17,5 @@ class Attachment(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     size_bytes = Column(Integer, nullable=True)
     url = Column(Text, nullable=True)
+
+    message = relationship("Message", back_populates="attachments")

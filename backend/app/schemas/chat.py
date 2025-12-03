@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
+from app.schemas.attachment import AttachmentMeta, AttachmentRead
 
 
 ChatType = Literal["dialog", "group"]
@@ -28,7 +29,13 @@ class MessageRead(BaseModel):
     chat_id: int
     sender_id: int
     text: str
+    attachments: list[AttachmentRead] = []
     created_at: datetime
 
     class Config:
         from_attributes = True
+
+
+class MessageCreate(BaseModel):
+    text: str
+    attachments: list[AttachmentMeta] = []

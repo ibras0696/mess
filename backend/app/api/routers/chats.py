@@ -5,7 +5,8 @@ from pydantic import BaseModel, Field
 
 from app.api.dependencies.auth import get_current_user_id
 from app.core.database import get_session
-from app.schemas.chat import ChatCreate, ChatRead, MessageRead
+from app.schemas.attachment import AttachmentMeta
+from app.schemas.chat import ChatCreate, ChatRead, MessageCreate, MessageRead
 from app.services.chat_service import ChatService
 
 router = APIRouter(prefix="/api/chats", tags=["chats"])
@@ -13,6 +14,7 @@ router = APIRouter(prefix="/api/chats", tags=["chats"])
 
 class SendMessageRequest(BaseModel):
     text: str = Field(min_length=1)
+    attachments: list[AttachmentMeta] = []
 
 
 @router.post("", response_model=ChatRead, status_code=status.HTTP_201_CREATED)
@@ -43,4 +45,5 @@ def send_message(
     session=Depends(get_session),
     user_id: int = Depends(get_current_user_id),
 ):
-    return ChatService(session).send_message(chat_id=chat_id, user_id=user_id, text=payload.text)
+    msg_create = MessageCreate(text=payload.text, attachments=payload.attachments)
+    return ChatService(session).send_message(chat_id=chat_id, user_id=user_id, data=msg_create)
