@@ -28,6 +28,13 @@ export const useRealtimeWs = () => {
           authorId: msg.sender_id,
           text: msg.text,
           createdAt: msg.created_at,
+          attachments: msg.attachments?.map((a) => ({
+            objectKey: a.object_key,
+            fileName: a.file_name,
+            contentType: a.content_type,
+            sizeBytes: a.size_bytes ?? null,
+            url: a.url,
+          })),
         })
       }
 
@@ -39,6 +46,13 @@ export const useRealtimeWs = () => {
           authorId: msg.sender_id,
           text: msg.text,
           createdAt: msg.created_at,
+          attachments: msg.attachments?.map((a) => ({
+            objectKey: a.object_key,
+            fileName: a.file_name,
+            contentType: a.content_type,
+            sizeBytes: a.size_bytes ?? null,
+            url: a.url,
+          })),
         })
       }
 

@@ -7,6 +7,15 @@ type Message = {
   text: string
   createdAt: string
   tempId?: string
+  attachments?: Attachment[]
+}
+
+type Attachment = {
+  objectKey: string
+  fileName: string
+  contentType: string
+  sizeBytes?: number | null
+  url?: string
 }
 
 type MessageState = {

@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { ResponseError } from '../api/generated/runtime'
 import { useApiClients } from '../hooks/useApiClients'
 import { useAuthStore } from '../store/useAuthStore'
 import { useChatStore } from '../store/useChatStore'
 import { useMessageStore } from '../store/useMessageStore'
 import { useWSStore } from '../store/useWSStore'
 import { formatTime } from '../utils/formatting'
+import { FileUploader, type UploadedAttachment } from '../components/FileUploader/FileUploader'
 
 export const ChatRoomPage = () => {
   const { chatId: chatIdParam } = useParams()
@@ -25,6 +27,7 @@ export const ChatRoomPage = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [text, setText] = useState('')
+  const [attachments, setAttachments] = useState<UploadedAttachment[]>([])
 
   const canSend = useMemo(() => Boolean(text.trim()), [text])
   const typingUsers = chatId ? typingByChat[chatId] ?? [] : []
@@ -55,7 +58,15 @@ export const ChatRoomPage = () => {
   }, [accessToken, authReady, chatId, chatsApi, setMessages])
 
   const handleSend = async () => {
-    if (!chatId || !canSend || !currentUser) return
+    if (!chatId || !currentUser) return
+    if (attachments.length && (!sendWs || !connected)) {
+      setError('Вложения отправляются по WebSocket, подключитесь к WS.')
+      return
+    }
+    if (!canSend) {
+      setError('Введите текст сообщения.')
+      return
+    }
     const tempId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `tmp-${Date.now()}`
 
     if (sendWs && connected) {
@@ -66,15 +77,28 @@ export const ChatRoomPage = () => {
         text,
         createdAt: new Date().toISOString(),
         tempId,
+        attachments: attachments.map((a) => ({
+          objectKey: a.objectKey,
+          fileName: a.fileName,
+          contentType: a.contentType,
+          sizeBytes: a.sizeBytes,
+          url: a.url,
+        })),
       })
       sendWs({
         type: 'send_message',
         temp_id: tempId,
         conversation_id: chatId,
         text,
-        attachments: [],
+        attachments: attachments.map((a) => ({
+          object_key: a.objectKey,
+          file_name: a.fileName,
+          content_type: a.contentType,
+          size_bytes: a.sizeBytes ?? undefined,
+        })),
       })
       setText('')
+      setAttachments([])
       return
     }
 
@@ -91,8 +115,13 @@ export const ChatRoomPage = () => {
         createdAt: sent.createdAt.toISOString(),
       })
       setText('')
-    } catch {
-      setError('Не удалось отправить сообщение. Проверьте API.')
+      setAttachments([])
+    } catch (err) {
+      if (err instanceof ResponseError && err.response.status === 429) {
+        setError('Слишком часто отправляете сообщения (rate limit). Попробуйте позже.')
+      } else {
+        setError('Не удалось отправить сообщение. Проверьте API.')
+      }
     }
   }
 
@@ -137,6 +166,15 @@ export const ChatRoomPage = () => {
                   <span className="text-xs text-slate-400">{formatTime(msg.createdAt)}</span>
                 </div>
                 <p className="mt-1 text-sm text-slate-200">{msg.text}</p>
+                {msg.attachments && msg.attachments.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {msg.attachments.map((att) => (
+                      <div key={att.objectKey} className="text-xs text-sky-200">
+                        📎 {att.fileName} ({att.contentType})
+                      </div>
+                    ))}
+                  </div>
+                )}
               </article>
             ))}
             {!messages.length && <p className="text-sm text-slate-400">Нет сообщений</p>}
@@ -150,6 +188,29 @@ export const ChatRoomPage = () => {
 
         <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 space-y-2">
           <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Отправка сообщения</p>
+          <div className="flex flex-wrap items-center gap-2">
+            {attachments.map((att) => (
+              <span
+                key={att.objectKey}
+                className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs text-sky-100"
+              >
+                {att.fileName}
+                <button
+                  type="button"
+                  className="text-slate-300 hover:text-white"
+                  onClick={() =>
+                    setAttachments((prev) => prev.filter((a) => a.objectKey !== att.objectKey))
+                  }
+                >
+                  ✕
+                </button>
+              </span>
+            ))}
+          </div>
+          <FileUploader
+            onAttached={(att) => setAttachments((prev) => [...prev, att])}
+            disabled={!chatId}
+          />
           <textarea
             className="min-h-[80px] w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-sky-400/60 focus:outline-none"
             placeholder="Текст сообщения"
