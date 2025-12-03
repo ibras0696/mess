@@ -26,3 +26,21 @@
 
 ## Журнал
 *(ниже добавляй записи по шаблону — свежие выше)*
+
+## 2025-12-03 — Спринт 1 (скелет фронта)
+- Сделано:
+  - Скаффолден Vite + React + TS, добавлен Tailwind 3 и базовый UI-превью мессенджера.
+  - Заложена структура по FRONTEND_STRUCTURE (api/ws/http/generated, store, pages, components, hooks, utils, styles).
+  - Dockerfile и docker-compose обновлены для `npm run dev -- --host`; node_modules собраны через npm ci.
+- В работе:
+  - Нет (готов перейти к auth/chats после появления OpenAPI клиента).
+- Блокеры/риски:
+  - OpenAPI json/клиент ещё не сгенерен, поэтому HTTP-логика — заглушки.
+- Следующие шаги:
+  - Сгенерировать TS-клиент по openapi.json, подключить auth flow (login/register).
+  - Подключить Zustand store к mock данным, добавить роутинг страниц.
+  - Начать интеграцию REST чатов (GET/POST /chats) и истории сообщений.
+- Артефакты:
+  - PR: -
+  - OpenAPI TS-клиент: нет
+  - Дизайн/решения UI: базовый landing с предпросмотром чатов/сообщений

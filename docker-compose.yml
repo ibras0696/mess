@@ -37,8 +37,7 @@ services:
       - ./frontend:/app
     ports:
       - "3000:3000"
-    # Placeholder command until the frontend is scaffolded.
-    command: ["sh", "-c", "echo 'Frontend scaffold pending. Replace command when app is ready.' && sleep infinity"]
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
     depends_on:
       backend:
         condition: service_started
