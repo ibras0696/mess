@@ -5,7 +5,7 @@ import { useApiClients } from '../hooks/useApiClients'
 import { useAuthStore } from '../store/useAuthStore'
 import { useChatStore } from '../store/useChatStore'
 import { EMPTY_MESSAGES, useMessageStore } from '../store/useMessageStore'
-import { useWSStore } from '../store/useWSStore'
+import { EMPTY_TYPING, useWSStore } from '../store/useWSStore'
 import { formatTime } from '../utils/formatting'
 import { FileUploader, type UploadedAttachment } from '../components/FileUploader/FileUploader'
 import { debugLog } from '../utils/debugLog'
@@ -36,7 +36,7 @@ export const ChatRoomPage = () => {
   const [attachments, setAttachments] = useState<UploadedAttachment[]>([])
 
   const canSend = useMemo(() => Boolean(text.trim()), [text])
-  const typingUsers = validChatId ? typingByChat[validChatId] ?? EMPTY_MESSAGES : EMPTY_MESSAGES
+  const typingUsers = validChatId ? typingByChat[validChatId] ?? EMPTY_TYPING : EMPTY_TYPING
   const [isTypingSelf, setIsTypingSelf] = useState(false)
 
   useEffect(() => {
@@ -83,11 +83,6 @@ export const ChatRoomPage = () => {
 
   const handleSend = async () => {
     if (!validChatId || !currentUser) return
-    if (attachments.length && (!sendWs || !connected)) {
-      setError('Вложения отправляются по WebSocket, подключитесь к WS.')
-      debugLog('chat:send:block_no_ws', { chatId: validChatId })
-      return
-    }
     if (!canSend) {
       setError('Введите текст сообщения.')
       debugLog('chat:send:block_empty', { chatId: validChatId })

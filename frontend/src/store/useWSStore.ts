@@ -15,6 +15,8 @@ type WSActions = {
   setTyping: (chatId: number, userId: number, isTyping: boolean) => void
 }
 
+export const EMPTY_TYPING: number[] = []
+
 export const useWSStore = create<WSState & WSActions>((set) => ({
   connected: false,
   lastEventAt: null,
