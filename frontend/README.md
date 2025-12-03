@@ -28,5 +28,9 @@ make frontend   # рестарт фронта
 - `src/pages` — маршруты (login/register/chats/chat/:id)
 - `src/components` — UI блоки (ChatList, MessageList, MessageInput и т.д.)
 
+## ENV
+- `VITE_API_URL` (по умолчанию http://localhost:8000/api)
+- `VITE_WS_URL` (по умолчанию ws://localhost:8000/ws)
+
 ## Tailwind
 `src/styles/globals.css` — подключение Tailwind и базовые стили (фон, шрифт Space Grotesk).
