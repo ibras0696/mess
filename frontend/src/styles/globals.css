@@ -1,0 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color: #e5e7eb;
+    background-color: #0b1224;
+  }
+
+  body {
+    @apply m-0 min-h-screen bg-gradient-to-br from-[#0b1224] via-[#0f172a] to-[#0b1224] text-slate-50 antialiased;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply rounded-2xl border border-white/10 bg-white/5 backdrop-blur shadow-xl;
+  }
+}
