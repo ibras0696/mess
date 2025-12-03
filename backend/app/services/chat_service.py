@@ -7,6 +7,7 @@ from app.core.config import settings
 from app.core.redis import get_redis
 from app.core.rate_limit import check_rate_limit
 from app.repositories.chat_repo import ChatRepository, MessageRepository
+from app.repositories.attachment_repo import AttachmentRepository
 from app.repositories.user_repo import UserRepository
 from app.schemas.attachment import AttachmentMeta
 from app.schemas.chat import ChatCreate, ChatRead, MessageCreate, MessageRead
@@ -71,7 +72,7 @@ class ChatService:
         offline_ids = member_ids - online_ids
         if not offline_ids:
             return
-        users = self.user_repo.list_by_ids(list(member_ids))
+        users = self.user_repo.list_by_ids(list(offline_ids))
         emails = [u.email for u in users if u.email]
         if not emails:
             return

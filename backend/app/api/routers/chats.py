@@ -14,7 +14,7 @@ router = APIRouter(prefix="/api/chats", tags=["chats"])
 
 class SendMessageRequest(BaseModel):
     text: str = Field(min_length=1)
-    attachments: list[AttachmentMeta] = []
+    attachments: list[AttachmentMeta] = Field(default_factory=list)
 
 
 @router.post("", response_model=ChatRead, status_code=status.HTTP_201_CREATED)
