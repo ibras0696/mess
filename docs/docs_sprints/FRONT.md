@@ -32,6 +32,7 @@
   - Добавлен presign upload: компонент FileUploader вызывает POST /attachments/presign и грузит файл PUT-ом, прикрепляет metadata к сообщению.
   - Отправка сообщений по WS теперь включает attachments; REST-фоллбек уведомляет, что вложения требуют WS.
   - UI показывает прикреплённые файлы в сообщениях; обработка 429 (rate limit) для REST отправки.
+  - После обновления бэка перегенерён OpenAPI: MessageRead содержит attachments, SendMessageRequest включает attachments; REST история теперь отображает вложения.
 - В работе:
   - Получение/отображение attachments из REST/WS после того как бэк начнёт отдавать их в MessageRead.
 - Блокеры/риски:
