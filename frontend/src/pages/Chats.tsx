@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChatCreateTypeEnum } from '../api/generated'
+import { ResponseError } from '../api/generated/runtime'
 import { useApiClients } from '../hooks/useApiClients'
 import { useAuthStore } from '../store/useAuthStore'
 import { useChatStore } from '../store/useChatStore'
@@ -13,6 +14,7 @@ export const ChatsPage = () => {
   const chats = useChatStore((state) => state.chats)
   const setChats = useChatStore((state) => state.setChats)
   const setActiveChat = useChatStore((state) => state.setActiveChat)
+  const resetAuth = useAuthStore((state) => state.reset)
   const navigate = useNavigate()
 
   const [loading, setLoading] = useState(false)
@@ -43,6 +45,11 @@ export const ChatsPage = () => {
           })),
         )
       } catch (err) {
+        if (err instanceof ResponseError && err.response.status === 401) {
+          resetAuth()
+          navigate('/login')
+          return
+        }
         setError('Не удалось загрузить чаты. Проверьте API.')
       } finally {
         setLoading(false)

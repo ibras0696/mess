@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { ResponseError } from '../api/generated/runtime'
 import { useApiClients } from '../hooks/useApiClients'
 import { useAuthStore } from '../store/useAuthStore'
@@ -17,6 +17,8 @@ export const ChatRoomPage = () => {
   const accessToken = useAuthStore((state) => state.accessToken)
   const authReady = useAuthStore((state) => state.authReady)
   const currentUser = useAuthStore((state) => state.user)
+  const resetAuth = useAuthStore((state) => state.reset)
+  const navigate = useNavigate()
   const chat = useChatStore((state) => state.chats.find((c) => c.id === validChatId))
   const setMessages = useMessageStore((state) => state.setMessages)
   const addMessage = useMessageStore((state) => state.addMessage)
@@ -58,7 +60,12 @@ export const ChatRoomPage = () => {
             })) ?? [],
         }))
         setMessages(validChatId, mapped)
-      } catch {
+      } catch (err) {
+        if (err instanceof ResponseError && err.response.status === 401) {
+          resetAuth()
+          navigate('/login')
+          return
+        }
         setError('Не удалось загрузить сообщения. Проверьте API.')
       } finally {
         setLoading(false)
@@ -145,8 +152,15 @@ export const ChatRoomPage = () => {
       setText('')
       setAttachments([])
     } catch (err) {
-      if (err instanceof ResponseError && err.response.status === 429) {
-        setError('Слишком часто отправляете сообщения (rate limit). Попробуйте позже.')
+      if (err instanceof ResponseError) {
+        if (err.response.status === 429) {
+          setError('Слишком часто отправляете сообщения (rate limit). Попробуйте позже.')
+        } else if (err.response.status === 401) {
+          resetAuth()
+          navigate('/login')
+        } else {
+          setError('Не удалось отправить сообщение. Проверьте API.')
+        }
       } else {
         setError('Не удалось отправить сообщение. Проверьте API.')
       }
