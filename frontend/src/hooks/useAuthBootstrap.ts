@@ -29,6 +29,8 @@ export const useAuthBootstrap = () => {
   useEffect(() => {
     let canceled = false
 
+    if (authReady) return
+
     const init = async () => {
       try {
         let token = accessToken
@@ -60,7 +62,20 @@ export const useAuthBootstrap = () => {
     return () => {
       canceled = true
     }
-  }, [accessToken, refreshToken, reset, setAuthReady, setTokenType, setTokens, setUser, user])
+  }, [
+    accessToken,
+    refreshToken,
+    user,
+    authReady,
+    reset,
+    setAuthReady,
+    setTokenType,
+    setTokens,
+    setUser,
+    usersApi,
+    usersApiNoToken,
+    authApiNoToken,
+  ])
 
   return { authReady, loading }
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { createWSClient } from '../api/ws/ws_client'
 import type { ClientEvent, ServerEvent } from '../api/ws/ws_events'
 import { appConfig } from '../config'
@@ -16,59 +16,57 @@ export const useRealtimeWs = () => {
   const addMessage = useMessageStore((state) => state.addMessage)
   const replaceTemp = useMessageStore((state) => state.replaceTemp)
 
-  const handleMessage = useCallback(
-    (event: ServerEvent) => {
-      setLastEventAt(new Date().toISOString())
+  // Держим обработчик в ref, чтобы эффект создания сокета не пересоздавался
+  const handlerRef = useRef<(event: ServerEvent) => void>()
+  handlerRef.current = (event: ServerEvent) => {
+    setLastEventAt(new Date().toISOString())
 
-      if (event.type === 'message_sent') {
-        const msg = event.message
-        replaceTemp(msg.chat_id, event.temp_id, {
-          id: msg.id,
-          chatId: msg.chat_id,
-          authorId: msg.sender_id,
-          text: msg.text,
-          createdAt: msg.created_at,
-          attachments: msg.attachments?.map((a) => ({
-            id: a.id,
-            objectKey: a.object_key,
-            fileName: a.file_name,
-            contentType: a.content_type,
-            sizeBytes: a.size_bytes ?? null,
-            url: a.url,
-          })),
-        })
-      }
+    if (event.type === 'message_sent') {
+      const msg = event.message
+      replaceTemp(msg.chat_id, event.temp_id, {
+        id: msg.id,
+        chatId: msg.chat_id,
+        authorId: msg.sender_id,
+        text: msg.text,
+        createdAt: msg.created_at,
+        attachments: msg.attachments?.map((a) => ({
+          id: a.id,
+          objectKey: a.object_key,
+          fileName: a.file_name,
+          contentType: a.content_type,
+          sizeBytes: a.size_bytes ?? null,
+          url: a.url,
+        })),
+      })
+    }
 
-      if (event.type === 'new_message') {
-        const msg = event.message
-        addMessage(msg.chat_id, {
-          id: msg.id,
-          chatId: msg.chat_id,
-          authorId: msg.sender_id,
-          text: msg.text,
-          createdAt: msg.created_at,
-          attachments: msg.attachments?.map((a) => ({
-            id: a.id,
-            objectKey: a.object_key,
-            fileName: a.file_name,
-            contentType: a.content_type,
-            sizeBytes: a.size_bytes ?? null,
-            url: a.url,
-          })),
-        })
-      }
+    if (event.type === 'new_message') {
+      const msg = event.message
+      addMessage(msg.chat_id, {
+        id: msg.id,
+        chatId: msg.chat_id,
+        authorId: msg.sender_id,
+        text: msg.text,
+        createdAt: msg.created_at,
+        attachments: msg.attachments?.map((a) => ({
+          id: a.id,
+          objectKey: a.object_key,
+          fileName: a.file_name,
+          contentType: a.content_type,
+          sizeBytes: a.size_bytes ?? null,
+          url: a.url,
+        })),
+      })
+    }
 
-      if (event.type === 'typing') {
-        setTyping(event.conversation_id, event.user_id, event.is_typing)
-      }
-
-    },
-    [addMessage, replaceTemp, setLastEventAt, setTyping],
-  )
+    if (event.type === 'typing') {
+      setTyping(event.conversation_id, event.user_id, event.is_typing)
+    }
+  }
 
   useEffect(() => {
     if (!accessToken) return
-    const client = createWSClient(appConfig.wsUrl, accessToken, handleMessage, {
+    const client = createWSClient(appConfig.wsUrl, accessToken, (event) => handlerRef.current?.(event), {
       onOpen: () => setConnected(true),
       onClose: () => setConnected(false),
     })
