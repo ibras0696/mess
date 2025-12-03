@@ -30,6 +30,25 @@
 ## Журнал
 *(ниже добавляй записи по шаблону — свежие выше)*
 
+## 2025-12-03 — Спринт 6 (Тесты/coverage)
+- Сделано:
+  - Добавлен pytest сетап через pyproject, dev requirements (pytest/pytest-cov).
+  - Тесты: auth (register/login/дубли), чаты/сообщения с экранированием и вложениями, запрет доступа не-участнику.
+  - Покрытие настроено (--cov backend/app, fail-under=80), исключены ws/attachment/email.
+  - Фиксы для тестов/бэка: Settings игнорирует лишние ENV, AttachmentRead.created_at как datetime, send_message делает flush перед вложениями.
+- В работе:
+  - Можно расширить покрытие на ws/attachments/email при необходимости.
+- Блокеры/риски:
+  - Требуется установить dev зависимости (backend/requirements-dev.txt) перед прогоном.
+- Следующие шаги:
+  - Добавить больше сценариев (refresh, receipts, rate limit).
+- Артефакты:
+  - PR: -
+  - API_CONTRACT: обновлён? нет
+  - openapi.json: обновлён? нет
+  - Alembic миграции: нет
+  - docker-compose/Makefile: нет
+
 ## 2025-12-03 — Спринт 6 (WS offload + mailhog порты)
 - Сделано:
   - Вынес синхронные операции в WebSocket хэндлере в threadpool с отдельными SessionLocal, чтобы не блокировать event loop.

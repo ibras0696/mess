@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 
@@ -29,7 +31,7 @@ class AttachmentRead(BaseModel):
     content_type: str
     size_bytes: int | None = None
     url: str | None = None
-    created_at: str
+    created_at: datetime
 
     class Config:
         from_attributes = True
