@@ -19,9 +19,11 @@ class Settings(BaseSettings):
     minio_access_key: str = Field(default="minio", alias="MINIO_ACCESS_KEY")
     minio_secret_key: str = Field(default="miniosecret", alias="MINIO_SECRET_KEY")
     minio_bucket: str = Field(default="attachments", alias="MINIO_BUCKET")
+    presign_expire_seconds: int = Field(default=600, alias="PRESIGN_EXPIRE_SECONDS")
 
     mailhog_host: str = Field(default="mailhog", alias="MAILHOG_HOST")
     mailhog_port: int = Field(default=1025, alias="MAILHOG_PORT")
+    mail_from: str = Field(default="noreply@example.com", alias="MAIL_FROM")
 
     secret_key: str = Field(default="dev-secret-key", alias="SECRET_KEY")
     jwt_algorithm: str = Field(default="HS256", alias="JWT_ALGORITHM")

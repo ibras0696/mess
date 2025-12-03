@@ -50,6 +50,27 @@
   - Alembic миграции: 20251203_init_users, 20251203_add_chats_messages
   - docker-compose/Makefile: порты хоста обновлены (см. .env.example)
 
+## 2025-12-03 — Спринт 5 (Файлы + Email)
+- Сделано:
+  - Добавлены attachment модель/миграция `20251203_add_attachments`.
+  - Presign endpoint `POST /api/attachments/presign` (auth required) возвращает PUT url/key/expires_in, MinIO через boto3.
+  - Celery task `email.offline_notification`, уведомления триггерятся при отправке сообщения (на всех участников чата, кроме отправителя) через Mailhog.
+  - Конфиг: PRESIGN_EXPIRE_SECONDS, MAIL_FROM; порт BACKEND_PORT добавлен, порты хоста сдвинуты (DB 5440, Redis 6381, MinIO 9100/9101, Mailhog 1026/8026).
+  - Смоук: compose up, alembic upgrade head, presign запрос возвращает URL, WS/REST ранее проверены.
+- В работе:
+  - Уточнение API_CONTRACT по WS/attachments, openapi.json.
+- Блокеры/риски:
+  - Нет контроля offline статуса — email шлётся всем участникам (stub).
+  - Mailhog warning amd64 на arm64.
+- Следующие шаги:
+  - Уточнить контракты (Message schema с attachments), реализовать сохранение метаданных после факта upload.
+- Артефакты:
+  - PR: -
+  - API_CONTRACT: обновлён? нет
+  - openapi.json: обновлён? нет
+  - Alembic миграции: 20251203_add_attachments (+ предыдущие)
+  - docker-compose/Makefile: порты/переменные обновлены
+
 ## 2025-12-03 — Спринт 2 (Auth)
 - Сделано:
   - Реализован User (SQLAlchemy) + репозиторий, схемы UserCreate/UserRead, JWT-поток (access/refresh).

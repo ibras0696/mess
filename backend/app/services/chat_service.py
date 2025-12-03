@@ -2,7 +2,9 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.repositories.chat_repo import ChatRepository, MessageRepository
+from app.repositories.user_repo import UserRepository
 from app.schemas.chat import ChatCreate, ChatRead, MessageRead
+from app.workers.celery_app import celery_app
 
 
 class ChatService:
@@ -10,6 +12,7 @@ class ChatService:
         self.session = session
         self.chat_repo = ChatRepository(session)
         self.message_repo = MessageRepository(session)
+        self.user_repo = UserRepository(session)
 
     def create_chat(self, current_user_id: int, payload: ChatCreate) -> ChatRead:
         members = set(payload.members)
@@ -38,7 +41,25 @@ class ChatService:
         msg = self.message_repo.create_message(chat_id=chat_id, sender_id=user_id, text=text)
         self.session.commit()
         self.session.refresh(msg)
+        self._notify_email(chat_id=chat_id, sender_id=user_id, text=text)
         return MessageRead.model_validate(msg)
 
     def get_member_ids(self, chat_id: int) -> set[int]:
         return set(self.chat_repo.get_member_ids(chat_id))
+
+    def _notify_email(self, chat_id: int, sender_id: int, text: str) -> None:
+        member_ids = self.get_member_ids(chat_id) - {sender_id}
+        if not member_ids:
+            return
+        users = self.user_repo.list_by_ids(list(member_ids))
+        emails = [u.email for u in users if u.email]
+        if not emails:
+            return
+        celery_app.send_task(
+            "email.offline_notification",
+            kwargs={
+                "to_emails": emails,
+                "subject": "New message",
+                "body": f"New message in chat {chat_id}: {text}",
+            },
+        )

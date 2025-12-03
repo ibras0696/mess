@@ -1,1 +1,1 @@
-from app.models import chat, user  # noqa: F401
+from app.models import attachment, chat, user  # noqa: F401
