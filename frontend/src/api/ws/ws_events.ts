@@ -36,8 +36,8 @@ export type ServerEvent =
       }
     }
   | { type: 'typing'; conversation_id: number; user_id: number; is_typing: boolean }
-  | { type: 'delivered'; message_id: number }
-  | { type: 'read'; message_id: number }
+  | { type: 'delivered'; message_id: number; user_id: number }
+  | { type: 'read'; message_id: number; user_id: number }
   | { type: 'online_status'; user_id: number; online: boolean }
 
 export type WSAttachment = {

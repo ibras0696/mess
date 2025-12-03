@@ -8,6 +8,8 @@ type Message = {
   createdAt: string
   tempId?: string
   attachments?: Attachment[]
+  deliveredBy?: number[]
+  readBy?: number[]
 }
 
 type Attachment = {
@@ -27,6 +29,8 @@ type MessageActions = {
   setMessages: (chatId: number, messages: Message[]) => void
   addMessage: (chatId: number, message: Message) => void
   replaceTemp: (chatId: number, tempId: string, message: Message) => void
+  markDelivered: (messageId: number, userId: number) => void
+  markRead: (messageId: number, userId: number) => void
 }
 
 export const useMessageStore = create<MessageState & MessageActions>((set) => ({
@@ -43,5 +47,27 @@ export const useMessageStore = create<MessageState & MessageActions>((set) => ({
       const existing = state.byChatId[chatId] ?? []
       const updated = existing.map((m) => (m.tempId === tempId ? message : m))
       return { byChatId: { ...state.byChatId, [chatId]: updated } }
+    }),
+  markDelivered: (messageId, userId) =>
+    set((state) => {
+      const next = { ...state.byChatId }
+      Object.entries(next).forEach(([chatKey, list]) => {
+        next[Number(chatKey)] = list.map((m) =>
+          m.id === messageId
+            ? { ...m, deliveredBy: Array.from(new Set([...(m.deliveredBy ?? []), userId])) }
+            : m,
+        )
+      })
+      return { byChatId: next }
+    }),
+  markRead: (messageId, userId) =>
+    set((state) => {
+      const next = { ...state.byChatId }
+      Object.entries(next).forEach(([chatKey, list]) => {
+        next[Number(chatKey)] = list.map((m) =>
+          m.id === messageId ? { ...m, readBy: Array.from(new Set([...(m.readBy ?? []), userId])) } : m,
+        )
+      })
+      return { byChatId: next }
     }),
 }))

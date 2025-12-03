@@ -183,27 +183,39 @@ export const ChatRoomPage = () => {
             <span className="text-xs text-slate-400">{loading ? 'Загрузка...' : `${messages.length} шт.`}</span>
           </div>
           <div className="mt-3 space-y-2">
-            {messages.map((msg) => (
-              <article
-                key={msg.id !== -1 ? msg.id : msg.tempId ?? `${msg.id}-${msg.text}`}
-                className="rounded-lg border border-white/10 bg-white/5 px-3 py-2"
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-white">User {msg.authorId}</p>
-                  <span className="text-xs text-slate-400">{formatTime(msg.createdAt)}</span>
-                </div>
-                <p className="mt-1 text-sm text-slate-200">{msg.text}</p>
-                {msg.attachments && msg.attachments.length > 0 && (
-                  <div className="mt-2 space-y-1">
-                    {msg.attachments.map((att) => (
-                      <div key={att.objectKey} className="text-xs text-sky-200">
-                        📎 {att.fileName} ({att.contentType})
-                      </div>
-                    ))}
+            {messages.map((msg) => {
+              const isMine = currentUser && msg.authorId === currentUser.id
+              const deliveredCount = msg.deliveredBy?.length ?? 0
+              const readCount = msg.readBy?.length ?? 0
+
+              return (
+                <article
+                  key={msg.id !== -1 ? msg.id : msg.tempId ?? `${msg.id}-${msg.text}`}
+                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-white">{isMine ? 'Вы' : `User ${msg.authorId}`}</p>
+                    <span className="text-xs text-slate-400">{formatTime(msg.createdAt)}</span>
                   </div>
-                )}
-              </article>
-            ))}
+                  <p className="mt-1 text-sm text-slate-200">{msg.text}</p>
+                  {msg.attachments && msg.attachments.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      {msg.attachments.map((att) => (
+                        <div key={att.objectKey} className="text-xs text-sky-200">
+                          📎 {att.fileName} ({att.contentType})
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {isMine && (deliveredCount > 0 || readCount > 0) && (
+                    <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-slate-400">
+                      {deliveredCount > 0 && <span>✓ delivered: {deliveredCount}</span>}
+                      {readCount > 0 && <span>✓✓ read: {readCount}</span>}
+                    </div>
+                  )}
+                </article>
+              )
+            })}
             {!messages.length && <p className="text-sm text-slate-400">Нет сообщений</p>}
             {typingUsers.length > 0 && (
               <p className="text-xs text-slate-400">

@@ -15,6 +15,8 @@ export const useRealtimeWs = () => {
   const setTyping = useWSStore((state) => state.setTyping)
   const addMessage = useMessageStore((state) => state.addMessage)
   const replaceTemp = useMessageStore((state) => state.replaceTemp)
+  const markDelivered = useMessageStore((state) => state.markDelivered)
+  const markRead = useMessageStore((state) => state.markRead)
 
   const handleMessage = useCallback(
     (event: ServerEvent) => {
@@ -61,8 +63,16 @@ export const useRealtimeWs = () => {
       if (event.type === 'typing') {
         setTyping(event.conversation_id, event.user_id, event.is_typing)
       }
+
+      if (event.type === 'delivered') {
+        markDelivered(event.message_id, event.user_id)
+      }
+
+      if (event.type === 'read') {
+        markRead(event.message_id, event.user_id)
+      }
     },
-    [addMessage, replaceTemp, setLastEventAt, setTyping],
+    [addMessage, markDelivered, markRead, replaceTemp, setLastEventAt, setTyping],
   )
 
   useEffect(() => {
