@@ -12,14 +12,15 @@ import { FileUploader, type UploadedAttachment } from '../components/FileUploade
 export const ChatRoomPage = () => {
   const { chatId: chatIdParam } = useParams()
   const chatId = chatIdParam ? Number(chatIdParam) : null
+  const validChatId = chatId !== null && !Number.isNaN(chatId) ? chatId : null
   const { chatsApi } = useApiClients()
   const accessToken = useAuthStore((state) => state.accessToken)
   const authReady = useAuthStore((state) => state.authReady)
   const currentUser = useAuthStore((state) => state.user)
-  const chat = useChatStore((state) => state.chats.find((c) => c.id === chatId))
+  const chat = useChatStore((state) => state.chats.find((c) => c.id === validChatId))
   const setMessages = useMessageStore((state) => state.setMessages)
   const addMessage = useMessageStore((state) => state.addMessage)
-  const messages = useMessageStore((state) => (chatId ? state.byChatId[chatId] ?? [] : []))
+  const messages = useMessageStore((state) => (validChatId ? state.byChatId[validChatId] ?? [] : []))
   const sendWs = useWSStore((state) => state.send)
   const typingByChat = useWSStore((state) => state.typingByChat)
   const connected = useWSStore((state) => state.connected)
@@ -30,16 +31,16 @@ export const ChatRoomPage = () => {
   const [attachments, setAttachments] = useState<UploadedAttachment[]>([])
 
   const canSend = useMemo(() => Boolean(text.trim()), [text])
-  const typingUsers = chatId ? typingByChat[chatId] ?? [] : []
+  const typingUsers = validChatId ? typingByChat[validChatId] ?? [] : []
   const [isTypingSelf, setIsTypingSelf] = useState(false)
 
   useEffect(() => {
-    if (!authReady || !accessToken || !chatId) return
+    if (!authReady || !accessToken || !validChatId) return
     const load = async () => {
       setLoading(true)
       setError(null)
       try {
-        const list = await chatsApi.listMessagesApiChatsChatIdMessagesGet({ chatId, limit: 50 })
+        const list = await chatsApi.listMessagesApiChatsChatIdMessagesGet({ chatId: validChatId, limit: 50 })
         const mapped = list.map((m) => ({
           id: m.id,
           chatId: m.chatId,
@@ -56,7 +57,7 @@ export const ChatRoomPage = () => {
               url: att.url ?? undefined,
             })) ?? [],
         }))
-        setMessages(chatId, mapped)
+        setMessages(validChatId, mapped)
       } catch {
         setError('Не удалось загрузить сообщения. Проверьте API.')
       } finally {
@@ -64,10 +65,10 @@ export const ChatRoomPage = () => {
       }
     }
     load()
-  }, [accessToken, authReady, chatId, chatsApi, setMessages])
+  }, [accessToken, authReady, chatsApi, setMessages, validChatId])
 
   const handleSend = async () => {
-    if (!chatId || !currentUser) return
+    if (!validChatId || !currentUser) return
     if (attachments.length && (!sendWs || !connected)) {
       setError('Вложения отправляются по WebSocket, подключитесь к WS.')
       return
@@ -79,9 +80,9 @@ export const ChatRoomPage = () => {
     const tempId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `tmp-${Date.now()}`
 
     if (sendWs && connected) {
-      addMessage(chatId, {
+      addMessage(validChatId, {
         id: -1,
-        chatId,
+        chatId: validChatId,
         authorId: currentUser.id,
         text,
         createdAt: new Date().toISOString(),
@@ -97,7 +98,7 @@ export const ChatRoomPage = () => {
       sendWs({
         type: 'send_message',
         temp_id: tempId,
-        conversation_id: chatId,
+        conversation_id: validChatId,
         text,
         attachments: attachments.map((a) => ({
           object_key: a.objectKey,
@@ -113,7 +114,7 @@ export const ChatRoomPage = () => {
 
     try {
       const sent = await chatsApi.sendMessageApiChatsChatIdMessagesPost({
-        chatId,
+        chatId: validChatId,
         sendMessageRequest: {
           text,
           attachments: attachments.map((a) => ({
@@ -125,7 +126,7 @@ export const ChatRoomPage = () => {
           })),
         },
       })
-      addMessage(chatId, {
+      addMessage(validChatId, {
         id: sent.id,
         chatId: sent.chatId,
         authorId: sent.senderId,
@@ -153,9 +154,18 @@ export const ChatRoomPage = () => {
   }
 
   const handleTyping = (isTyping: boolean) => {
-    if (!chatId || !sendWs || !connected) return
-    sendWs({ type: isTyping ? 'typing_start' : 'typing_stop', conversation_id: chatId })
+    if (!validChatId || !sendWs || !connected) return
+    sendWs({ type: isTyping ? 'typing_start' : 'typing_stop', conversation_id: validChatId })
     setIsTypingSelf(isTyping)
+  }
+
+  if (!validChatId) {
+    return (
+      <div className="glass-card p-6">
+        <h2 className="text-xl font-semibold text-white">Некорректный чат</h2>
+        <p className="mt-2 text-sm text-slate-300">Укажите корректный идентификатор чата.</p>
+      </div>
+    )
   }
 
   return (
