@@ -1,9 +1,13 @@
-FROM node:20-alpine AS base
+FROM node:20-bullseye-slim AS base
 WORKDIR /app
 
 FROM base AS deps
 COPY package*.json ./
-RUN npm ci
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates wget gnupg \
+  && rm -rf /var/lib/apt/lists/* \
+  && npm ci \
+  && npx playwright install --with-deps chromium
 
 FROM base AS dev
 WORKDIR /app
