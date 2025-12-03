@@ -20,9 +20,11 @@ export const useWSStore = create<WSState & WSActions>((set) => ({
   lastEventAt: null,
   send: undefined,
   typingByChat: {},
-  setConnected: (connected) => set({ connected }),
+  setConnected: (connected) =>
+    set((state) => (state.connected === connected ? state : { connected })),
   setLastEventAt: (iso) => set({ lastEventAt: iso }),
-  setSender: (sender) => set({ send: sender }),
+  setSender: (sender) =>
+    set((state) => (state.send === sender ? state : { send: sender })),
   setTyping: (chatId, userId, isTyping) =>
     set((state) => {
       const current = state.typingByChat[chatId] ?? []

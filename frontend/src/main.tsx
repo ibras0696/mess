@@ -10,6 +10,7 @@ import { LoginPage } from './pages/Login'
 import { RegisterPage } from './pages/Register'
 import { ProtectedRoute } from './components/Auth/ProtectedRoute'
 import { PublicRoute } from './components/Auth/PublicRoute'
+import { AppErrorBoundary } from './components/AppErrorBoundary'
 
 const router = createBrowserRouter([
   {
@@ -54,7 +55,7 @@ const router = createBrowserRouter([
 ])
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+  <AppErrorBoundary>
     <RouterProvider router={router} />
-  </StrictMode>,
+  </AppErrorBoundary>,
 )

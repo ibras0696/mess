@@ -4,10 +4,11 @@ import { ResponseError } from '../api/generated/runtime'
 import { useApiClients } from '../hooks/useApiClients'
 import { useAuthStore } from '../store/useAuthStore'
 import { useChatStore } from '../store/useChatStore'
-import { useMessageStore } from '../store/useMessageStore'
+import { EMPTY_MESSAGES, useMessageStore } from '../store/useMessageStore'
 import { useWSStore } from '../store/useWSStore'
 import { formatTime } from '../utils/formatting'
 import { FileUploader, type UploadedAttachment } from '../components/FileUploader/FileUploader'
+import { debugLog } from '../utils/debugLog'
 
 export const ChatRoomPage = () => {
   const { id: chatIdParam } = useParams()
@@ -22,7 +23,9 @@ export const ChatRoomPage = () => {
   const chat = useChatStore((state) => state.chats.find((c) => c.id === validChatId))
   const setMessages = useMessageStore((state) => state.setMessages)
   const addMessage = useMessageStore((state) => state.addMessage)
-  const messages = useMessageStore((state) => (validChatId ? state.byChatId[validChatId] ?? [] : []))
+  const messages = useMessageStore((state) =>
+    validChatId ? state.byChatId[validChatId] ?? EMPTY_MESSAGES : EMPTY_MESSAGES,
+  )
   const sendWs = useWSStore((state) => state.send)
   const typingByChat = useWSStore((state) => state.typingByChat)
   const connected = useWSStore((state) => state.connected)
@@ -33,11 +36,12 @@ export const ChatRoomPage = () => {
   const [attachments, setAttachments] = useState<UploadedAttachment[]>([])
 
   const canSend = useMemo(() => Boolean(text.trim()), [text])
-  const typingUsers = validChatId ? typingByChat[validChatId] ?? [] : []
+  const typingUsers = validChatId ? typingByChat[validChatId] ?? EMPTY_MESSAGES : EMPTY_MESSAGES
   const [isTypingSelf, setIsTypingSelf] = useState(false)
 
   useEffect(() => {
     if (!authReady || !accessToken || !validChatId) return
+    debugLog('chat:load_messages:start', { chatId: validChatId })
     const load = async () => {
       setLoading(true)
       setError(null)
@@ -60,12 +64,15 @@ export const ChatRoomPage = () => {
             })) ?? [],
         }))
         setMessages(validChatId, mapped)
+        debugLog('chat:load_messages:success', { chatId: validChatId, count: mapped.length })
       } catch (err) {
         if (err instanceof ResponseError && err.response.status === 401) {
+          debugLog('chat:load_messages:401', { chatId: validChatId })
           resetAuth()
           navigate('/login')
           return
         }
+        debugLog('chat:load_messages:error', { chatId: validChatId, err })
         setError('Не удалось загрузить сообщения. Проверьте API.')
       } finally {
         setLoading(false)
@@ -78,10 +85,12 @@ export const ChatRoomPage = () => {
     if (!validChatId || !currentUser) return
     if (attachments.length && (!sendWs || !connected)) {
       setError('Вложения отправляются по WebSocket, подключитесь к WS.')
+      debugLog('chat:send:block_no_ws', { chatId: validChatId })
       return
     }
     if (!canSend) {
       setError('Введите текст сообщения.')
+      debugLog('chat:send:block_empty', { chatId: validChatId })
       return
     }
     const tempId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `tmp-${Date.now()}`
@@ -114,6 +123,7 @@ export const ChatRoomPage = () => {
           size_bytes: a.sizeBytes ?? undefined,
         })),
       })
+      debugLog('chat:send:ws', { chatId: validChatId, tempId })
       setText('')
       setAttachments([])
       return
@@ -130,7 +140,7 @@ export const ChatRoomPage = () => {
             contentType: a.contentType,
             sizeBytes: a.sizeBytes ?? null,
             url: a.url ?? null,
-          })),
+            })),
         },
       })
       addMessage(validChatId, {
@@ -151,18 +161,23 @@ export const ChatRoomPage = () => {
       })
       setText('')
       setAttachments([])
+      debugLog('chat:send:rest', { chatId: validChatId, id: sent.id })
     } catch (err) {
       if (err instanceof ResponseError) {
         if (err.response.status === 429) {
           setError('Слишком часто отправляете сообщения (rate limit). Попробуйте позже.')
+          debugLog('chat:send:429', { chatId: validChatId })
         } else if (err.response.status === 401) {
+          debugLog('chat:send:401', { chatId: validChatId })
           resetAuth()
           navigate('/login')
         } else {
           setError('Не удалось отправить сообщение. Проверьте API.')
+          debugLog('chat:send:resp_error', { chatId: validChatId, status: err.response?.status })
         }
       } else {
         setError('Не удалось отправить сообщение. Проверьте API.')
+        debugLog('chat:send:unknown_error', { chatId: validChatId, err })
       }
     }
   }
@@ -171,6 +186,7 @@ export const ChatRoomPage = () => {
     if (!validChatId || !sendWs || !connected) return
     sendWs({ type: isTyping ? 'typing_start' : 'typing_stop', conversation_id: validChatId })
     setIsTypingSelf(isTyping)
+    debugLog('chat:typing', { chatId: validChatId, isTyping })
   }
 
   if (!validChatId) {

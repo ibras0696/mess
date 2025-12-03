@@ -3,6 +3,7 @@ import { useAuthStore } from './store/useAuthStore'
 import { useWSStore } from './store/useWSStore'
 import { useAuthBootstrap } from './hooks/useAuthBootstrap'
 import { useRealtimeWs } from './hooks/useRealtimeWs'
+import { initGlobalErrorLogging } from './utils/debugLog'
 
 function App() {
   const user = useAuthStore((state) => state.user)
@@ -10,6 +11,7 @@ function App() {
 
   useAuthBootstrap()
   useRealtimeWs()
+  initGlobalErrorLogging()
 
   const navLoggedIn = Boolean(user)
 
@@ -40,7 +42,10 @@ function App() {
           <div className="flex items-center gap-3">
             {connected && <span className="h-2 w-2 rounded-full bg-emerald-400" title="WS connected" />}
             {user ? (
-              <span className="text-sm text-slate-100">{user.username}</span>
+              <div className="flex flex-col leading-tight text-right">
+                <span className="text-sm font-semibold text-slate-100">{user.username}</span>
+                <span className="text-[11px] text-slate-400">id: {user.id}</span>
+              </div>
             ) : (
               <span className="text-xs text-slate-400">anon</span>
             )}

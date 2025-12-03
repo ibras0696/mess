@@ -8,7 +8,7 @@ import { useChatStore } from '../store/useChatStore'
 import { formatTime } from '../utils/formatting'
 
 export const ChatsPage = () => {
-  const { chatsApi } = useApiClients()
+  const { chatsApi, usersApi } = useApiClients()
   const accessToken = useAuthStore((state) => state.accessToken)
   const authReady = useAuthStore((state) => state.authReady)
   const chats = useChatStore((state) => state.chats)
@@ -18,10 +18,12 @@ export const ChatsPage = () => {
   const navigate = useNavigate()
 
   const [loading, setLoading] = useState(false)
+  const [loadingUsers, setLoadingUsers] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [createTitle, setCreateTitle] = useState('')
   const [createType, setCreateType] = useState<'dialog' | 'group'>('group')
   const [createMembers, setCreateMembers] = useState('')
+  const [users, setUsers] = useState<{ id: number; email?: string | null; username?: string | null }[]>([])
 
   const sortedChats = useMemo(
     () => [...chats].sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? '')),
@@ -56,7 +58,27 @@ export const ChatsPage = () => {
       }
     }
     load()
-  }, [accessToken, authReady, chatsApi, setChats])
+  }, [accessToken, authReady, chatsApi, setChats, resetAuth, navigate])
+
+  useEffect(() => {
+    if (!authReady || !accessToken) return
+    const loadUsers = async () => {
+      setLoadingUsers(true)
+      try {
+        const list = await usersApi.listUsersApiUsersGet()
+        setUsers(list)
+      } catch (err) {
+        if (err instanceof ResponseError && err.response.status === 401) {
+          resetAuth()
+          navigate('/login')
+          return
+        }
+      } finally {
+        setLoadingUsers(false)
+      }
+    }
+    loadUsers()
+  }, [accessToken, authReady, navigate, resetAuth, usersApi])
 
   const handleCreate = async () => {
     if (!accessToken) return
@@ -98,6 +120,9 @@ export const ChatsPage = () => {
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Список чатов</p>
           <h2 className="text-xl font-semibold text-white">GET /api/chats</h2>
+          <p className="text-[11px] text-slate-500 mt-1">
+            Ваш user id: {accessToken ? useAuthStore.getState().user?.id ?? '—' : '—'}
+          </p>
         </div>
         <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-slate-300">REST</span>
       </div>
@@ -173,6 +198,25 @@ export const ChatsPage = () => {
             )}
           </div>
         </section>
+      </div>
+
+      <div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-white">Пользователи (для ID)</h3>
+          <span className="text-xs text-slate-400">{loadingUsers ? 'Загрузка...' : `${users.length} шт.`}</span>
+        </div>
+        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {users.map((u) => (
+            <div key={u.id} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+              <p className="text-sm font-semibold text-white">{u.username ?? '(no username)'}</p>
+              <p className="text-xs text-slate-300 break-all">{u.email ?? '—'}</p>
+              <p className="text-[11px] text-slate-500">id: {u.id}</p>
+            </div>
+          ))}
+          {!users.length && !loadingUsers && (
+            <p className="text-sm text-slate-400">Нет данных. Проверьте доступ к /api/users.</p>
+          )}
+        </div>
       </div>
     </div>
   )

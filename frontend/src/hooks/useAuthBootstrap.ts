@@ -3,6 +3,7 @@ import { appConfig } from '../config'
 import { useApiClients } from './useApiClients'
 import { useAuthStore } from '../store/useAuthStore'
 import { AuthApi, UsersApi, Configuration } from '../api/generated'
+import { debugLog } from '../utils/debugLog'
 
 export const useAuthBootstrap = () => {
   const {
@@ -24,6 +25,7 @@ export const useAuthBootstrap = () => {
 
   useEffect(() => {
     hydrate()
+    debugLog('auth:hydrate')
   }, [hydrate])
 
   useEffect(() => {
@@ -41,18 +43,22 @@ export const useAuthBootstrap = () => {
           setTokens(refreshed.accessToken, refreshToken)
           setTokenType(refreshed.tokenType ?? 'bearer')
           token = refreshed.accessToken
+          debugLog('auth:refresh_ok')
         }
 
         if (token && !user) {
           const me = await (token ? usersApi.getMeApiUsersMeGet() : usersApiNoToken.getMeApiUsersMeGet())
           setUser(me)
+          debugLog('auth:me_ok', { id: me.id })
         }
       } catch {
+        debugLog('auth:init_reset')
         reset()
       } finally {
         if (!canceled) {
           setAuthReady(true)
           setLoading(false)
+          debugLog('auth:ready')
         }
       }
     }
