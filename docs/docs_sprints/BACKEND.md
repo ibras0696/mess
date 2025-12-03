@@ -30,6 +30,26 @@
 ## Журнал
 *(ниже добавляй записи по шаблону — свежие выше)*
 
+## 2025-12-03 — Спринт 4 (WebSocket)
+- Сделано:
+  - Реализован WS endpoint `/ws?token=JWT`: аутентификация по access JWT, менеджер подключений.
+  - События: `send_message` (ACK `message_sent`, broadcast `new_message`), `typing_start/typing_stop` (broadcast `typing`).
+  - Переиспользован ChatService; сообщения сериализуются в JSON (ISO даты).
+  - Смоук: поднят стек (порты: DB 5440, Redis 6381, MinIO 9100/9101, Mailhog 1026/8026, backend host 8001 через BACKEND_PORT), миграции применены, создан чат, проверен WS обмен (ACK + broadcast) через websockets lib.
+- В работе:
+  - Следующий спринт — файлы/attachments + email.
+- Блокеры/риски:
+  - Mailhog warning (amd64 на arm64) остаётся.
+  - Нужно зафиксировать WS контракт в API_CONTRACT/openapi.
+- Следующие шаги:
+  - Дописать WS спецификацию, затем перейти к файлам/email.
+- Артефакты:
+  - PR: -
+  - API_CONTRACT: обновлён? нет
+  - openapi.json: обновлён? нет
+  - Alembic миграции: 20251203_init_users, 20251203_add_chats_messages
+  - docker-compose/Makefile: порты хоста обновлены (см. .env.example)
+
 ## 2025-12-03 — Спринт 2 (Auth)
 - Сделано:
   - Реализован User (SQLAlchemy) + репозиторий, схемы UserCreate/UserRead, JWT-поток (access/refresh).

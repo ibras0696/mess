@@ -39,3 +39,6 @@ class ChatService:
         self.session.commit()
         self.session.refresh(msg)
         return MessageRead.model_validate(msg)
+
+    def get_member_ids(self, chat_id: int) -> set[int]:
+        return set(self.chat_repo.get_member_ids(chat_id))

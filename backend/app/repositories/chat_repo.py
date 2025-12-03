@@ -34,6 +34,10 @@ class ChatRepository:
         stmt = select(ChatMember).where(and_(ChatMember.chat_id == chat_id, ChatMember.user_id == user_id))
         return self.session.scalar(stmt) is not None
 
+    def get_member_ids(self, chat_id: int) -> list[int]:
+        stmt = select(ChatMember.user_id).where(ChatMember.chat_id == chat_id)
+        return [row[0] for row in self.session.execute(stmt).all()]
+
     def get_chat(self, chat_id: int) -> Optional[Chat]:
         return self.session.get(Chat, chat_id)
 
