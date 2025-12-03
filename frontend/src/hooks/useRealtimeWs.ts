@@ -16,6 +16,8 @@ export const useRealtimeWs = () => {
   const addMessage = useMessageStore((state) => state.addMessage)
   const replaceTemp = useMessageStore((state) => state.replaceTemp)
 
+  const clientRef = useRef<ReturnType<typeof createWSClient> | null>(null)
+
   // Держим обработчик в ref, чтобы эффект создания сокета не пересоздавался
   const handlerRef = useRef<(event: ServerEvent) => void>()
   handlerRef.current = (event: ServerEvent) => {
@@ -65,24 +67,24 @@ export const useRealtimeWs = () => {
   }
 
   useEffect(() => {
-    if (!accessToken) {
-      // Сбрасываем только если что-то было установлено, чтобы не гонять setState без конца
-      const { send, connected } = useWSStore.getState()
-      if (send || connected) {
-        setSender(undefined)
-        setConnected(false)
-      }
-      return
-    }
+    // очистка предыдущего клиента, если токен сменился/обнулился
+    clientRef.current?.close()
+    clientRef.current = null
+    setSender(undefined)
+    setConnected(false)
+
+    if (!accessToken) return
 
     const client = createWSClient(appConfig.wsUrl, accessToken, (event) => handlerRef.current?.(event), {
       onOpen: () => setConnected(true),
       onClose: () => setConnected(false),
     })
+    clientRef.current = client
     setSender(() => (payload: ClientEvent) => client.send(payload))
 
     return () => {
-      client.close()
+      clientRef.current?.close()
+      clientRef.current = null
       setSender(undefined)
       setConnected(false)
     }
