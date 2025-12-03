@@ -12,7 +12,7 @@ type AuthState = {
 
 type AuthActions = {
   setTokens: (accessToken: string, refreshToken: string) => void
-  setTokenType: (tokenType: string) => void
+  setTokenType: (tokenType: string | null) => void
   setUser: (user: AuthState['user']) => void
   setAuthReady: (ready: boolean) => void
   reset: () => void

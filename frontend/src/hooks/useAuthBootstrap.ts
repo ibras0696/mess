@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
-import { authApi } from '../api/http/auth'
+import { useEffect, useMemo, useState } from 'react'
+import { appConfig } from '../config'
+import { useApiClients } from './useApiClients'
 import { useAuthStore } from '../store/useAuthStore'
+import { AuthApi, UsersApi, Configuration } from '../api/generated'
 
 export const useAuthBootstrap = () => {
   const {
@@ -15,6 +17,9 @@ export const useAuthBootstrap = () => {
     setAuthReady,
     authReady,
   } = useAuthStore()
+  const { usersApi } = useApiClients()
+  const authApiNoToken = useMemo(() => new AuthApi(new Configuration({ basePath: appConfig.apiBaseUrl })), [])
+  const usersApiNoToken = useMemo(() => new UsersApi(new Configuration({ basePath: appConfig.apiBaseUrl })), [])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -28,14 +33,16 @@ export const useAuthBootstrap = () => {
       try {
         let token = accessToken
         if (!token && refreshToken) {
-          const refreshed = await authApi.refresh(refreshToken)
-          setTokens(refreshed.access_token, refreshToken)
-          setTokenType(refreshed.token_type)
-          token = refreshed.access_token
+          const refreshed = await authApiNoToken.refreshApiAuthRefreshPost({
+            refreshRequest: { refreshToken },
+          })
+          setTokens(refreshed.accessToken, refreshToken)
+          setTokenType(refreshed.tokenType ?? 'bearer')
+          token = refreshed.accessToken
         }
 
         if (token && !user) {
-          const me = await authApi.me(token)
+          const me = await (token ? usersApi.getMeApiUsersMeGet() : usersApiNoToken.getMeApiUsersMeGet())
           setUser(me)
         }
       } catch {

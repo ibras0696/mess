@@ -5,6 +5,7 @@ type Chat = {
   title: string
   type: 'dialog' | 'group'
   unread: number
+  createdAt?: string
 }
 
 type ChatState = {

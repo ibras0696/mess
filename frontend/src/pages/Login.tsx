@@ -2,7 +2,7 @@ import type { FormEvent } from 'react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { authApi } from '../api/http/auth'
-import { ApiError } from '../api/http/client'
+import { ResponseError } from '../api/generated/runtime'
 import { useAuthStore } from '../store/useAuthStore'
 
 export const LoginPage = () => {
@@ -22,18 +22,13 @@ export const LoginPage = () => {
     setLoading(true)
     try {
       const res = await authApi.login({ email, password })
-      setTokens(res.access_token, res.refresh_token)
-      setTokenType(res.token_type)
+      setTokens(res.accessToken, res.refreshToken)
+      setTokenType(res.tokenType ?? 'bearer')
       setUser(res.user)
       navigate('/chats')
     } catch (err) {
-      if (err instanceof ApiError) {
-        if (err.status === 401) {
-          setError('Неверный email или пароль')
-        } else {
-          const detail = typeof err.data === 'object' && err.data && 'detail' in (err.data as Record<string, unknown>)
-          setError(detail ? String((err.data as { detail?: string }).detail) : 'Не удалось войти. Проверьте API и сеть.')
-        }
+      if (err instanceof ResponseError && err.response.status === 401) {
+        setError('Неверный email или пароль')
       } else {
         setError('Не удалось войти. Проверьте API и сеть.')
       }
