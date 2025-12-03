@@ -14,6 +14,7 @@ export const LoginPage = () => {
 
   const setTokens = useAuthStore((state) => state.setTokens)
   const setUser = useAuthStore((state) => state.setUser)
+  const setTokenType = useAuthStore((state) => state.setTokenType)
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -22,11 +23,17 @@ export const LoginPage = () => {
     try {
       const res = await authApi.login({ email, password })
       setTokens(res.access_token, res.refresh_token)
+      setTokenType(res.token_type)
       setUser(res.user)
       navigate('/chats')
     } catch (err) {
-      if (err instanceof ApiError && err.status === 401) {
-        setError('Неверный email или пароль')
+      if (err instanceof ApiError) {
+        if (err.status === 401) {
+          setError('Неверный email или пароль')
+        } else {
+          const detail = typeof err.data === 'object' && err.data && 'detail' in (err.data as Record<string, unknown>)
+          setError(detail ? String((err.data as { detail?: string }).detail) : 'Не удалось войти. Проверьте API и сеть.')
+        }
       } else {
         setError('Не удалось войти. Проверьте API и сеть.')
       }

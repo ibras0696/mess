@@ -3,25 +3,29 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { authApi } from '../api/http/auth'
 import { ApiError } from '../api/http/client'
+import { useAuthStore } from '../store/useAuthStore'
 
 export const RegisterPage = () => {
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const setTokens = useAuthStore((state) => state.setTokens)
+  const setUser = useAuthStore((state) => state.setUser)
+  const setTokenType = useAuthStore((state) => state.setTokenType)
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
     setError(null)
-    setSuccess(null)
     setLoading(true)
     try {
-      await authApi.register({ email, password, username })
-      setSuccess('Аккаунт создан. Можно войти.')
-      navigate('/login')
+      const res = await authApi.register({ email, password, username })
+      setTokens(res.access_token, res.refresh_token)
+      setTokenType(res.token_type)
+      setUser(res.user)
+      navigate('/chats')
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
         setError('Пользователь уже существует')
@@ -40,11 +44,6 @@ export const RegisterPage = () => {
       {error && (
         <div className="mt-3 rounded-lg border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-sm text-rose-100">
           {error}
-        </div>
-      )}
-      {success && (
-        <div className="mt-3 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-100">
-          {success}
         </div>
       )}
       <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
