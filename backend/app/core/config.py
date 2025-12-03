@@ -1,4 +1,5 @@
-from pydantic import Field
+from datetime import timedelta
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -24,8 +25,25 @@ class Settings(BaseSettings):
 
     secret_key: str = Field(default="dev-secret-key", alias="SECRET_KEY")
     jwt_algorithm: str = Field(default="HS256", alias="JWT_ALGORITHM")
+    access_token_minutes: int = Field(default=30, alias="ACCESS_TOKEN_MINUTES")
+    refresh_token_minutes: int = Field(default=60 * 24 * 7, alias="REFRESH_TOKEN_MINUTES")  # 7 days
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False)
+
+    @property
+    def access_token_ttl(self) -> timedelta:
+        return timedelta(minutes=self.access_token_minutes)
+
+    @property
+    def refresh_token_ttl(self) -> timedelta:
+        return timedelta(minutes=self.refresh_token_minutes)
+
+    @field_validator("secret_key")
+    @classmethod
+    def validate_secret(cls, v: str) -> str:
+        if not v:
+            raise ValueError("SECRET_KEY must not be empty")
+        return v
 
 
 settings = Settings()

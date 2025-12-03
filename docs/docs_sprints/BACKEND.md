@@ -30,6 +30,26 @@
 ## Журнал
 *(ниже добавляй записи по шаблону — свежие выше)*
 
+## 2025-12-03 — Спринт 2 (Auth)
+- Сделано:
+  - Реализован User (SQLAlchemy) + репозиторий, схемы UserCreate/UserRead, JWT-поток (access/refresh).
+  - Эндпоинты: POST /api/auth/register, /login, /refresh; GET /api/users/me, /api/users/{id}; auth dependency HTTP Bearer.
+  - Добавлены security utils (hash/verify, JWT), CORS, DB session.
+  - Настроен Alembic, базовая миграция users, Makefile migrate, env переменные TTL токенов.
+  - Обновлён backend Dockerfile для Alembic; requirements (+jose, passlib, email-validator).
+- В работе:
+  - Следующие модели/миграции (чаты) запланированы на Спринт 3.
+- Блокеры/риски:
+  - Mailhog собирается как amd64 на arm64 (warning), но стартует.
+- Следующие шаги:
+  - После согласования — переход к чатам (REST).
+- Артефакты:
+  - PR: -
+  - API_CONTRACT: обновлён? нет (auth схему не уточняли дополнительно)
+  - openapi.json: обновлён? нет
+  - Alembic миграции: 20251203_init_users
+  - docker-compose/Makefile: Makefile migrate обновлён; compose без изменений
+
 ## 2025-12-03 — Спринт 1 (инфра)
 - Сделано:
   - Собрал и поднял стек docker-compose (backend, celery, db, redis, minio, mailhog, фронт-заглушка).
