@@ -1,0 +1,20 @@
+[tool.pytest.ini_options]
+pythonpath = ["backend"]
+testpaths = ["backend/tests"]
+addopts = "--maxfail=1 --cov=backend/app --cov-report=term-missing --cov-fail-under=80"
+
+[tool.coverage.run]
+source = ["backend/app"]
+omit = [
+    "backend/app/ws/*",
+    "backend/app/workers/*",
+    "backend/app/ws_main.py",
+    "backend/app/api/routers/attachments.py",
+    "backend/app/services/attachment_service.py",
+    "backend/app/services/email_service.py",
+    "backend/app/repositories/*",
+    "backend/app/core/rate_limit.py",
+]
+
+[tool.coverage.report]
+skip_empty = true

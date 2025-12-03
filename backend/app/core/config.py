@@ -31,7 +31,12 @@ class Settings(BaseSettings):
     refresh_token_minutes: int = Field(default=60 * 24 * 7, alias="REFRESH_TOKEN_MINUTES")  # 7 days
     rate_limit_messages_per_minute: int = Field(default=60, alias="RATE_LIMIT_MESSAGES_PER_MINUTE")
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False)
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
 
     @property
     def access_token_ttl(self) -> timedelta:

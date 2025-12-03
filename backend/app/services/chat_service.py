@@ -52,6 +52,7 @@ class ChatService:
         if not safe_text:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Empty message")
         msg = self.message_repo.create_message(chat_id=chat_id, sender_id=user_id, text=safe_text)
+        self.session.flush()
         if data.attachments:
             attachment_repo = AttachmentRepository(self.session)
             items = [a.model_dump() for a in data.attachments]
