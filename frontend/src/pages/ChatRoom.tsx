@@ -82,6 +82,7 @@ export const ChatRoomPage = () => {
   }, [accessToken, authReady, chatsApi, setMessages, validChatId])
 
   const handleSend = async () => {
+    debugLog('chat:send:click', { chatId: validChatId, textLen: text.length, canSend, connected })
     if (!validChatId || !currentUser) return
     if (!canSend) {
       setError('Введите текст сообщения.')
@@ -292,7 +293,10 @@ export const ChatRoomPage = () => {
           <button
             type="button"
             className="rounded-lg bg-emerald-400 px-4 py-2 text-sm font-semibold text-emerald-900 shadow-lg shadow-emerald-400/30 transition hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-60"
-            onClick={handleSend}
+            onClick={() => {
+              debugLog('chat:send:button_click', { chatId: validChatId, canSend, textLen: text.length })
+              handleSend()
+            }}
             disabled={!canSend}
           >
             Отправить
