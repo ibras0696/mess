@@ -12,7 +12,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app.core.config import settings  # noqa: E402
 from app.models.base import Base  # noqa: E402
-from app.models import user, chat  # noqa: E402,F401
+from app.models import user, chat, attachment  # noqa: E402,F401
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.database_url)

@@ -30,6 +30,47 @@
 ## Журнал
 *(ниже добавляй записи по шаблону — свежие выше)*
 
+## 2025-12-03 — Спринт 4 (WebSocket)
+- Сделано:
+  - Реализован WS endpoint `/ws?token=JWT`: аутентификация по access JWT, менеджер подключений.
+  - События: `send_message` (ACK `message_sent`, broadcast `new_message`), `typing_start/typing_stop` (broadcast `typing`).
+  - Переиспользован ChatService; сообщения сериализуются в JSON (ISO даты).
+  - Смоук: поднят стек (порты: DB 5440, Redis 6381, MinIO 9100/9101, Mailhog 1026/8026, backend host 8001 через BACKEND_PORT), миграции применены, создан чат, проверен WS обмен (ACK + broadcast) через websockets lib.
+- В работе:
+  - Следующий спринт — файлы/attachments + email.
+- Блокеры/риски:
+  - Mailhog warning (amd64 на arm64) остаётся.
+  - Нужно зафиксировать WS контракт в API_CONTRACT/openapi.
+- Следующие шаги:
+  - Дописать WS спецификацию, затем перейти к файлам/email.
+- Артефакты:
+  - PR: -
+  - API_CONTRACT: обновлён? нет
+  - openapi.json: обновлён? нет
+  - Alembic миграции: 20251203_init_users, 20251203_add_chats_messages
+  - docker-compose/Makefile: порты хоста обновлены (см. .env.example)
+
+## 2025-12-03 — Спринт 5 (Файлы + Email)
+- Сделано:
+  - Добавлены attachment модель/миграция `20251203_add_attachments`.
+  - Presign endpoint `POST /api/attachments/presign` (auth required) возвращает PUT url/key/expires_in, MinIO через boto3.
+  - Celery task `email.offline_notification`, уведомления триггерятся при отправке сообщения (на всех участников чата, кроме отправителя) через Mailhog.
+  - Конфиг: PRESIGN_EXPIRE_SECONDS, MAIL_FROM; порт BACKEND_PORT добавлен, порты хоста сдвинуты (DB 5440, Redis 6381, MinIO 9100/9101, Mailhog 1026/8026).
+  - Смоук: compose up, alembic upgrade head, presign запрос возвращает URL, WS/REST ранее проверены.
+- В работе:
+  - Уточнение API_CONTRACT по WS/attachments, openapi.json.
+- Блокеры/риски:
+  - Нет контроля offline статуса — email шлётся всем участникам (stub).
+  - Mailhog warning amd64 на arm64.
+- Следующие шаги:
+  - Уточнить контракты (Message schema с attachments), реализовать сохранение метаданных после факта upload.
+- Артефакты:
+  - PR: -
+  - API_CONTRACT: обновлён? нет
+  - openapi.json: обновлён? нет
+  - Alembic миграции: 20251203_add_attachments (+ предыдущие)
+  - docker-compose/Makefile: порты/переменные обновлены
+
 ## 2025-12-03 — Спринт 2 (Auth)
 - Сделано:
   - Реализован User (SQLAlchemy) + репозиторий, схемы UserCreate/UserRead, JWT-поток (access/refresh).

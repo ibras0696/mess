@@ -21,3 +21,9 @@ class UserRepository:
         user = User(email=email, username=username, password_hash=password_hash)
         self.session.add(user)
         return user
+
+    def list_by_ids(self, ids: list[int]) -> list[User]:
+        if not ids:
+            return []
+        stmt = select(User).where(User.id.in_(ids))
+        return list(self.session.scalars(stmt).all())
