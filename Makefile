@@ -6,17 +6,25 @@ COMPOSE = docker compose
 up:
 	$(COMPOSE) up -d --build
 
-# Полностью остановить и удалить контейнеры/тома
+# Полностью остановить (с сохранением томов)
 down:
+	$(COMPOSE) down
+
+# Полностью остановить и удалить тома (очистка БД/Redis/MinIO)
+down-clean:
 	$(COMPOSE) down -v
 
-# Быстрый рестарт всего стека
+# Быстрый рестарт всего стека (с сохранением данных)
 restart:
-	$(COMPOSE) down -v && $(COMPOSE) up -d --build
-
-restart-full:
 	$(COMPOSE) down && $(COMPOSE) up -d --build
 
+# Рестарт с очисткой томов (полный ресет БД/Redis/MinIO)
+restart-clean:
+	$(COMPOSE) down -v && $(COMPOSE) up -d --build
+
+# Совместимость: старое имя без удаления томов
+restart-full:
+	$(COMPOSE) down && $(COMPOSE) up -d --build
 
 
 # Общие логи
