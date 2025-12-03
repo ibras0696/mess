@@ -27,12 +27,29 @@
 ## Журнал
 *(ниже добавляй записи по шаблону — свежие выше)*
 
+## 2025-12-03 — Спринт 5 (файлы + rate-limit)
+- Сделано:
+  - Добавлен presign upload: компонент FileUploader вызывает POST /attachments/presign и грузит файл PUT-ом, прикрепляет metadata к сообщению.
+  - Отправка сообщений по WS теперь включает attachments; REST-фоллбек уведомляет, что вложения требуют WS.
+  - UI показывает прикреплённые файлы в сообщениях; обработка 429 (rate limit) для REST отправки.
+  - После обновления бэка перегенерён OpenAPI: MessageRead содержит attachments, SendMessageRequest включает attachments; REST история теперь отображает вложения.
+- В работе:
+  - Получение/отображение attachments из REST/WS после того как бэк начнёт отдавать их в MessageRead.
+- Блокеры/риски:
+  - OpenAPI MessageRead пока без attachments; WS payload с attachments обрабатывается заранее, но бэк их не сохраняет.
+- Следующие шаги:
+  - Дождаться бэка с attachments в Message, перегенерить клиент; подключить delivered/read/online при появлении.
+- Артефакты:
+  - PR: -
+  - OpenAPI TS-клиент: обновлён
+  - Дизайн/решения UI: FileUploader, индикаторы вложений
+
 ## 2025-12-03 — Спринт 4 (WebSocket)
 - Сделано:
   - Добавлен WS клиент с автопереподключением, обработка событий message_sent/new_message/typing.
   - Отправка сообщений теперь через WS (с temp_id) с REST fallback; история подтягивается REST, новые приходят live.
   - Индикация typing в чатах, protected маршруты сохраняются.
-  - docker-compose/backend порт теперь настраивается через BACKEND_PORT (по умолчанию 8000).
+  - docker-compose/backend порт теперь настраивается через BACKEND_PORT (по умолчанию 8000); перегенерен OpenAPI клиент после обновления бэка (attachments/ws).
 - В работе:
   - delivered/read/online события и улучшение UX (debounce typing).
 - Блокеры/риски:

@@ -1,4 +1,4 @@
-.openapi-generator-ignore
+apis/AttachmentsApi.ts
 apis/AuthApi.ts
 apis/ChatsApi.ts
 apis/HealthApi.ts
@@ -6,6 +6,10 @@ apis/MetaApi.ts
 apis/UsersApi.ts
 apis/index.ts
 docs/AccessToken.md
+docs/AttachmentLinkRequest.md
+docs/AttachmentMeta.md
+docs/AttachmentRead.md
+docs/AttachmentsApi.md
 docs/AuthApi.md
 docs/ChatCreate.md
 docs/ChatRead.md
@@ -15,6 +19,8 @@ docs/HealthApi.md
 docs/LoginRequest.md
 docs/MessageRead.md
 docs/MetaApi.md
+docs/PresignRequest.md
+docs/PresignResponse.md
 docs/RefreshRequest.md
 docs/SendMessageRequest.md
 docs/TokenPair.md
@@ -25,11 +31,16 @@ docs/ValidationError.md
 docs/ValidationErrorLocInner.md
 index.ts
 models/AccessToken.ts
+models/AttachmentLinkRequest.ts
+models/AttachmentMeta.ts
+models/AttachmentRead.ts
 models/ChatCreate.ts
 models/ChatRead.ts
 models/HTTPValidationError.ts
 models/LoginRequest.ts
 models/MessageRead.ts
+models/PresignRequest.ts
+models/PresignResponse.ts
 models/RefreshRequest.ts
 models/SendMessageRequest.ts
 models/TokenPair.ts

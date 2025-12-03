@@ -1,32 +1,32 @@
 
-# MessageRead
+# AttachmentLinkRequest
 
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`id` | number
-`chatId` | number
-`senderId` | number
-`text` | string
-`attachments` | [Array&lt;AttachmentRead&gt;](AttachmentRead.md)
-`createdAt` | Date
+`messageId` | number
+`objectKey` | string
+`fileName` | string
+`contentType` | string
+`sizeBytes` | number
+`url` | string
 
 ## Example
 
 ```typescript
-import type { MessageRead } from ''
+import type { AttachmentLinkRequest } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "id": null,
-  "chatId": null,
-  "senderId": null,
-  "text": null,
-  "attachments": null,
-  "createdAt": null,
-} satisfies MessageRead
+  "messageId": null,
+  "objectKey": null,
+  "fileName": null,
+  "contentType": null,
+  "sizeBytes": null,
+  "url": null,
+} satisfies AttachmentLinkRequest
 
 console.log(example)
 
@@ -35,7 +35,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as MessageRead
+const exampleParsed = JSON.parse(exampleJSON) as AttachmentLinkRequest
 console.log(exampleParsed)
 ```
 

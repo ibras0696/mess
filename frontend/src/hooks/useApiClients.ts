@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { AuthApi, ChatsApi, Configuration, UsersApi } from '../api/generated'
+import { AttachmentsApi, AuthApi, ChatsApi, Configuration, UsersApi } from '../api/generated'
 import { appConfig } from '../config'
 import { useAuthStore } from '../store/useAuthStore'
 
@@ -20,6 +20,7 @@ export const useApiClients = () => {
       authApi: new AuthApi(configuration),
       usersApi: new UsersApi(configuration),
       chatsApi: new ChatsApi(configuration),
+      attachmentsApi: new AttachmentsApi(configuration),
     }),
     [configuration],
   )
