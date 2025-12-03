@@ -9,6 +9,7 @@ import { HomePage } from './pages/Home'
 import { LoginPage } from './pages/Login'
 import { RegisterPage } from './pages/Register'
 import { ProtectedRoute } from './components/Auth/ProtectedRoute'
+import { PublicRoute } from './components/Auth/PublicRoute'
 
 const router = createBrowserRouter([
   {
@@ -16,8 +17,22 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: 'login', element: <LoginPage /> },
-      { path: 'register', element: <RegisterPage /> },
+      {
+        path: 'login',
+        element: (
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        ),
+      },
+      {
+        path: 'register',
+        element: (
+          <PublicRoute>
+            <RegisterPage />
+          </PublicRoute>
+        ),
+      },
       {
         path: 'chats',
         element: (

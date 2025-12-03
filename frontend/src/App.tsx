@@ -11,6 +11,8 @@ function App() {
   useAuthBootstrap()
   useRealtimeWs()
 
+  const navLoggedIn = Boolean(user)
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0b1224] via-[#0f172a] to-[#0b1224] px-6 py-6">
       <div className="mx-auto flex max-w-6xl flex-col gap-6">
@@ -19,15 +21,21 @@ function App() {
             Web Messenger
           </NavLink>
           <nav className="flex items-center gap-4 text-sm text-slate-200">
-            <NavLink className="transition hover:text-white" to="/login">
-              Login
-            </NavLink>
-            <NavLink className="transition hover:text-white" to="/register">
-              Register
-            </NavLink>
-            <NavLink className="transition hover:text-white" to="/chats">
-              Chats
-            </NavLink>
+            {!navLoggedIn && (
+              <>
+                <NavLink className="transition hover:text-white" to="/login">
+                  Login
+                </NavLink>
+                <NavLink className="transition hover:text-white" to="/register">
+                  Register
+                </NavLink>
+              </>
+            )}
+            {navLoggedIn && (
+              <NavLink className="transition hover:text-white" to="/chats">
+                Chats
+              </NavLink>
+            )}
           </nav>
           <div className="flex items-center gap-3">
             {connected && <span className="h-2 w-2 rounded-full bg-emerald-400" title="WS connected" />}
