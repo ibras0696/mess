@@ -24,7 +24,7 @@ ps:
 	$(COMPOSE) ps
 
 migrate:
-	@echo "Alembic migrations will be added once the DB models are defined."
+	$(COMPOSE) run --rm backend alembic upgrade head
 
 env:
 	@test -f .env || cp .env.example .env
