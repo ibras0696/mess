@@ -10,7 +10,7 @@ import { formatTime } from '../utils/formatting'
 import { FileUploader, type UploadedAttachment } from '../components/FileUploader/FileUploader'
 
 export const ChatRoomPage = () => {
-  const { chatId: chatIdParam } = useParams()
+  const { id: chatIdParam } = useParams()
   const chatId = chatIdParam ? Number(chatIdParam) : null
   const validChatId = chatId !== null && !Number.isNaN(chatId) ? chatId : null
   const { chatsApi } = useApiClients()
