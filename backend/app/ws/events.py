@@ -6,12 +6,16 @@ class ClientEventType(StrEnum):
     SEND_MESSAGE = "send_message"
     TYPING_START = "typing_start"
     TYPING_STOP = "typing_stop"
+    DELIVERED = "delivered"
+    READ = "read"
 
 
 class ServerEventType(StrEnum):
     MESSAGE_SENT = "message_sent"
     NEW_MESSAGE = "new_message"
     TYPING = "typing"
+    DELIVERED = "delivered"
+    READ = "read"
 
 
 class SendMessagePayload(TypedDict):

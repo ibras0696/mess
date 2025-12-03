@@ -27,3 +27,6 @@ class UserRepository:
             return []
         stmt = select(User).where(User.id.in_(ids))
         return list(self.session.scalars(stmt).all())
+
+    def exists(self, user_id: int) -> bool:
+        return self.session.get(User, user_id) is not None

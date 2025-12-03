@@ -35,6 +35,8 @@
   - Rate limit на отправку сообщений (Redis, лимит по умолчанию 60/мин), XSS escape/trim текста, пустые сообщения запрещены.
   - Regenerate openapi.json под текущий API/WS.
   - Endpoint `/api/attachments/link` для сохранения метаданных файла к сообщению.
+  - WS delivered/read обработка (запись в receipts, broadcast), attachments добавлены в REST/WS Message.
+  - Security headers middleware добавлено.
 - В работе:
   - Доп. hardening (security headers, индексы), фиксация WS delivered/read/online по договорённости.
 - Блокеры/риски:

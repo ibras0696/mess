@@ -4,6 +4,7 @@ from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 
 from app.models.chat import Chat, ChatMember, Message
+from app.models.attachment import Attachment
 
 
 class ChatRepository:
@@ -37,6 +38,9 @@ class ChatRepository:
     def get_member_ids(self, chat_id: int) -> list[int]:
         stmt = select(ChatMember.user_id).where(ChatMember.chat_id == chat_id)
         return [row[0] for row in self.session.execute(stmt).all()]
+
+    def get_message(self, message_id: int) -> Message | None:
+        return self.session.get(Message, message_id)
 
     def get_chat(self, chat_id: int) -> Optional[Chat]:
         return self.session.get(Chat, chat_id)

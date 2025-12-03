@@ -10,6 +10,8 @@ from app.ws.connection_manager import ConnectionManager
 from app.ws.events import ClientEventType, ServerEventType, TypingPayload
 from app.schemas.attachment import AttachmentMeta
 from app.schemas.chat import MessageCreate
+from app.repositories.receipt_repo import ReceiptRepository
+from app.core.redis import get_redis
 
 router = APIRouter()
 manager = ConnectionManager()
@@ -35,8 +37,11 @@ async def websocket_endpoint(
     session=Depends(get_session),
     user_id: int = Depends(get_current_user_id_ws),
 ):
+    redis = get_redis()
+    redis.sadd("online_users", user_id)
     await manager.connect(user_id, websocket)
     service = ChatService(session)
+    receipt_repo = ReceiptRepository(session)
     try:
         while True:
             message_text = await websocket.receive_text()
@@ -94,7 +99,36 @@ async def websocket_endpoint(
                         "is_typing": event_type == ClientEventType.TYPING_START,
                     },
                 )
+            elif event_type == ClientEventType.DELIVERED:
+                message_id = data.get("message_id")
+                if not message_id:
+                    continue
+                msg_obj = service.chat_repo.get_message(message_id)
+                if not msg_obj or not service.chat_repo.is_member(msg_obj.chat_id, user_id):
+                    continue
+                receipt_repo.mark_delivered(message_id=message_id, user_id=user_id)
+                session.commit()
+                member_ids = service.get_member_ids(chat_id=msg_obj.chat_id)
+                await manager.broadcast_users(
+                    member_ids,
+                    {"type": ServerEventType.DELIVERED, "message_id": message_id, "user_id": user_id},
+                )
+            elif event_type == ClientEventType.READ:
+                message_id = data.get("message_id")
+                if not message_id:
+                    continue
+                msg_obj = service.chat_repo.get_message(message_id)
+                if not msg_obj or not service.chat_repo.is_member(msg_obj.chat_id, user_id):
+                    continue
+                receipt_repo.mark_read(message_id=message_id, user_id=user_id)
+                session.commit()
+                member_ids = service.get_member_ids(chat_id=msg_obj.chat_id)
+                await manager.broadcast_users(
+                    member_ids,
+                    {"type": ServerEventType.READ, "message_id": message_id, "user_id": user_id},
+                )
             else:
                 await websocket.send_json({"type": "error", "detail": "unknown event"})
     except WebSocketDisconnect:
         manager.disconnect(user_id, websocket)
+        redis.srem("online_users", user_id)

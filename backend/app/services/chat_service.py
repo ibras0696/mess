@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.redis import get_redis
+from app.core.rate_limit import check_rate_limit
 from app.repositories.chat_repo import ChatRepository, MessageRepository
 from app.repositories.user_repo import UserRepository
 from app.schemas.attachment import AttachmentMeta
@@ -23,6 +24,7 @@ class ChatService:
     def create_chat(self, current_user_id: int, payload: ChatCreate) -> ChatRead:
         members = set(payload.members)
         members.add(current_user_id)
+        check_rate_limit(f"rate:chat_create:{current_user_id}", limit=20)
 
         chat = self.chat_repo.create_chat(type_=payload.type, title=payload.title)
         self.session.flush()
@@ -65,6 +67,10 @@ class ChatService:
         member_ids = self.get_member_ids(chat_id) - {sender_id}
         if not member_ids:
             return
+        online_ids = {int(uid) for uid in self.redis.smembers("online_users")}
+        offline_ids = member_ids - online_ids
+        if not offline_ids:
+            return
         users = self.user_repo.list_by_ids(list(member_ids))
         emails = [u.email for u in users if u.email]
         if not emails:
@@ -79,9 +85,4 @@ class ChatService:
         )
 
     def _check_rate_limit(self, user_id: int) -> None:
-        key = f"rate:msg:{user_id}"
-        current = self.redis.incr(key)
-        if current == 1:
-            self.redis.expire(key, 60)
-        if current > settings.rate_limit_messages_per_minute:
-            raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Rate limit exceeded")
+        check_rate_limit(f"rate:msg:{user_id}", settings.rate_limit_messages_per_minute)

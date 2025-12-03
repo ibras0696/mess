@@ -169,10 +169,18 @@ Response:
 }
 ```
 
-### delivered/read/online (зарезервировано)
-- Не реализовано; при вводе договориться о payload:
-  - delivered/read: `{ "type": "delivered"|"read", "message_id": <id> }`
-  - online_status: `{ "type": "online_status", "user_id": <id>, "online": true|false }`
+### delivered
+```
+{ "type": "delivered", "message_id": 55 }
+```
+
+### read
+```
+{ "type": "read", "message_id": 55 }
+```
+
+### online_status (зарезервировано)
+- Сейчас не используется.
 
 ---
 
@@ -206,8 +214,26 @@ Response:
 }
 ```
 
-### delivered/read/online (зарезервировано)
-- Пока не рассылаются.
+### delivered
+```
+{
+  "type": "delivered",
+  "message_id": 55,
+  "user_id": 5
+}
+```
+
+### read
+```
+{
+  "type": "read",
+  "message_id": 55,
+  "user_id": 5
+}
+```
+
+### online_status (зарезервировано)
+- Сейчас не используется.
 
 ----
 ````
