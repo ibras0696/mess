@@ -217,12 +217,6 @@ export const ChatRoomPage = () => {
                       ))}
                     </div>
                   )}
-                  {isMine && (deliveredCount > 0 || readCount > 0) && (
-                    <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-slate-400">
-                      {deliveredCount > 0 && <span>✓ delivered: {deliveredCount}</span>}
-                      {readCount > 0 && <span>✓✓ read: {readCount}</span>}
-                    </div>
-                  )}
                 </article>
               )
             })}
