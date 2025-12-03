@@ -98,6 +98,9 @@ export const ChatsPage = () => {
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Список чатов</p>
           <h2 className="text-xl font-semibold text-white">GET /api/chats</h2>
+          <p className="text-[11px] text-slate-500 mt-1">
+            Ваш user id: {accessToken ? useAuthStore.getState().user?.id ?? '—' : '—'}
+          </p>
         </div>
         <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-slate-300">REST</span>
       </div>
