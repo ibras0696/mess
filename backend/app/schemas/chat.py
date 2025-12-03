@@ -29,7 +29,7 @@ class MessageRead(BaseModel):
     chat_id: int
     sender_id: int
     text: str
-    attachments: list[AttachmentRead] = []
+    attachments: list[AttachmentRead] = Field(default_factory=list)
     created_at: datetime
 
     class Config:
@@ -38,4 +38,4 @@ class MessageRead(BaseModel):
 
 class MessageCreate(BaseModel):
     text: str
-    attachments: list[AttachmentMeta] = []
+    attachments: list[AttachmentMeta] = Field(default_factory=list)
