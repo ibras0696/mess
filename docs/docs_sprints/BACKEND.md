@@ -34,6 +34,7 @@
 - Сделано:
   - Собрал и поднял стек docker-compose (backend, celery, db, redis, minio, mailhog, фронт-заглушка).
   - Проверил health: `GET /api/healthz` -> 200 {"status":"ok"}, root -> {"app":"web-messenger","env":"local"}.
+  - Стек остановлен после проверки (`docker compose down`).
 - В работе:
   - Ожидаю задачи следующего спринта.
 - Блокеры/риски:
