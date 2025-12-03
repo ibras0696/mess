@@ -14,6 +14,11 @@ down:
 restart:
 	$(COMPOSE) down -v && $(COMPOSE) up -d --build
 
+restart-full:
+	$(COMPOSE) down && $(COMPOSE) up -d --build
+
+
+
 # Общие логи
 logs:
 	$(COMPOSE) logs -f
