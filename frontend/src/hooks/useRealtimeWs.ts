@@ -77,7 +77,7 @@ export const useRealtimeWs = () => {
       setSender(undefined)
       setConnected(false)
     }
-  }, [accessToken, handleMessage, setConnected, setSender])
+  }, [accessToken, setConnected, setSender])
 
   const sendMessage = (payload: ClientEvent) => {
     const sender = useWSStore.getState().send
