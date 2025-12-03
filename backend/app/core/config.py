@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = Field(default="HS256", alias="JWT_ALGORITHM")
     access_token_minutes: int = Field(default=30, alias="ACCESS_TOKEN_MINUTES")
     refresh_token_minutes: int = Field(default=60 * 24 * 7, alias="REFRESH_TOKEN_MINUTES")  # 7 days
+    rate_limit_messages_per_minute: int = Field(default=60, alias="RATE_LIMIT_MESSAGES_PER_MINUTE")
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False)
 

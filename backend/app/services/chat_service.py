@@ -1,6 +1,10 @@
+import html
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
+from app.core.redis import get_redis
 from app.repositories.chat_repo import ChatRepository, MessageRepository
 from app.repositories.user_repo import UserRepository
 from app.schemas.chat import ChatCreate, ChatRead, MessageRead
@@ -13,6 +17,7 @@ class ChatService:
         self.chat_repo = ChatRepository(session)
         self.message_repo = MessageRepository(session)
         self.user_repo = UserRepository(session)
+        self.redis = get_redis()
 
     def create_chat(self, current_user_id: int, payload: ChatCreate) -> ChatRead:
         members = set(payload.members)
@@ -38,7 +43,11 @@ class ChatService:
     def send_message(self, chat_id: int, user_id: int, text: str) -> MessageRead:
         if not self.chat_repo.is_member(chat_id, user_id):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not a member of this chat")
-        msg = self.message_repo.create_message(chat_id=chat_id, sender_id=user_id, text=text)
+        self._check_rate_limit(user_id)
+        safe_text = html.escape(text).strip()
+        if not safe_text:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Empty message")
+        msg = self.message_repo.create_message(chat_id=chat_id, sender_id=user_id, text=safe_text)
         self.session.commit()
         self.session.refresh(msg)
         self._notify_email(chat_id=chat_id, sender_id=user_id, text=text)
@@ -63,3 +72,11 @@ class ChatService:
                 "body": f"New message in chat {chat_id}: {text}",
             },
         )
+
+    def _check_rate_limit(self, user_id: int) -> None:
+        key = f"rate:msg:{user_id}"
+        current = self.redis.incr(key)
+        if current == 1:
+            self.redis.expire(key, 60)
+        if current > settings.rate_limit_messages_per_minute:
+            raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Rate limit exceeded")
