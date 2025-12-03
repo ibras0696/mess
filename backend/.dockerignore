@@ -1,0 +1,15 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.venv
+.pytest_cache
+.mypy_cache
+.DS_Store
+.git
+.gitignore
+.env
+alembic/versions
+tests
+dist
+build
